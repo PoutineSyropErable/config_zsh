@@ -1,6 +1,6 @@
 Here's what it looks like
 
-![Example of zsh config Image](Example.png)
+![Example of zsh config Image](zzz_Example.png)
 
 Also, to install do:
 
