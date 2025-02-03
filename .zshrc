@@ -175,6 +175,7 @@ alias nmod="cd ~/.config/nvim ; nvim ."
 alias vmod="cd ~/.config/nvim ; nvim ."
 alias keymod="cd ~/.config/nvim ; nvim lua/core/keymaps.lua"
 
+alias bless="bat --color=always --paging=always"
 
 
 alias ch='cd ~'
@@ -192,6 +193,7 @@ alias cP="cd ~/.config/polybar.old/"
 alias cr="cd ~/.config/rofi"
 alias cS="cd ~/.config/systemd"
 alias ctm="cd ~/.config/tmux"
+alias cz="cd ~/.config/zsh"
 alias cw="cd ~/.config/waybar"
 
 
@@ -350,10 +352,119 @@ bdiff() {
 
 
 
+# Aliases
+alias ga="git add ."
+alias gdf="git diff --name-only"
+
+# Function to commit with a message
+gc() {
+    git commit -m "$1"
+}
+
+# Function to switch to laptop branch inside ~/.config
+gcl() {
+    cd ~/.config || return
+    git checkout laptop
+    cd - || return
+}
+
+# Function to switch to desktop branch inside ~/.config
+gcd() {
+    cd ~/.config || return
+    git checkout desktop
+    cd - || return
+}
+
+# Function to add, commit, and push with a message
+git_do_all() {
+    if [[ $# -eq 0 ]]; then
+        echo "Usage: git_do_all <commit_message>"
+        return 1
+    fi
+
+    local commit_msg="$1"
+    git add .
+    git commit -m "$commit_msg"
+    git push origin "$(git branch --show-current)"
+}
+
+# Function to commit and push all submodules and the main repo
+git_push_all_msg() {
+    if [[ $# -eq 0 ]]; then
+        echo "Error: Commit message is required."
+        return 1
+    fi
+
+    local commit_message="$1"
+
+    echo "Processing all submodules..."
+    echo "________________________________"
+
+    git submodule foreach --recursive '
+        echo "Updating submodule $name..."
+        git add --all
+        git commit -m "'"$commit_message"'" || echo "No changes to commit in $name"
+        git push origin $(git branch --show-current)
+        echo "________________________________"
+    '
+
+    echo "Processing the current repository..."
+    git add --all
+    git commit -m "$commit_message" || echo "No changes to commit in the root repository"
+    git push origin "$(git branch --show-current)"
+}
+
+# Function to push all with a hardcoded commit message
+git_push_all() {
+    git_push_all_msg "super push, root git dir and all submodules"
+}
+
+# Function to commit all submodules and the main repo
+git_commit_all() {
+    echo "Processing all submodules..."
+    echo "________________________________"
+
+    git submodule foreach --recursive '
+        echo "Updating submodule $name..."
+        git add .
+        git commit -m "all update commit"
+        echo "________________________________"
+    '
+
+    git add .
+    git commit -m "all update commit"
+    git push origin "$(git branch --show-current)"
+}
+
+# Function to pull all submodules and the main repo
+git_pull_all() {
+    echo "Processing all submodules..."
+    echo "________________________________"
+
+    git submodule foreach --recursive '
+        echo "Updating submodule $name..."
+        git pull origin $(git branch --show-current)
+        echo "________________________________"
+    '
+}
+
+# Additional Git Aliases
+alias gcm="gc"
+alias git_file_diff="git diff --name-only HEAD"
+alias gfd="git_file_diff"
+
+alias gpd="git push origin desktop"
+alias gpl="git push origin laptop"
+alias gpm="git push origin master"
+alias gpmn="git push origin main"
+
+alias gpam="git_push_all_msg"
+alias gpa="git_push_all"
+
+alias gda="git_do_all"
 
 
 
-alias bless="bat --color=always --paging=always"
 
 
 
