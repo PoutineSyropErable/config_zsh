@@ -106,22 +106,61 @@ fi
 # 🚀 3️⃣ Python Virtual Environments
 # ─────────────────────────────────────────────────────
 
-alias pythonvenv="$HOME/MainPython_Virtual_Environment/pip_venv/bin/python"
+# Define the base directory for Python virtual environments (from pip)
+export PYTHON_VENV_DIR="$HOME/MainPython_Virtual_Environment"
+
+# Aliases for managing virtual environments
+alias pythonvenv="$PYTHON_VENV_DIR/pip_venv/bin/python" #without activating the venv, using its python to run a file 
+# you can do: "pv file.py" for example
 alias pv="pythonvenv"
-alias govenv="source $HOME/MainPython_Virtual_Environment/pip_venv/bin/activate"
-alias projvenv="source $HOME/MainPython_Virtual_Environment/project_venv/bin/activate"
+
+# activate and deactivate venvs
+alias govenv="source $PYTHON_VENV_DIR/pip_venv/bin/activate"
+alias projvenv="source $PYTHON_VENV_DIR/project_venv/bin/activate"
 alias lvenv="deactivate"
+
+
+
+# A premade wrapper: 
+# These don't work with conda so they are kinda useless for you... But it does make some python stuff
+# Easier I guess if you want to use that rather then my venvs example alias
+# Like in further project where you'd rather use pip packages then conda packages
+export WORKON_HOME=$HOME/.virtualenvs
+export VIRTUALENVWRAPPER_PYTHON=$(which python3)
+export VIRTUALENVWRAPPER_VIRTUALENV=$(which virtualenv)
+source $(which virtualenvwrapper.sh)
+
+# Command				What It Does
+# mkvirtualenv myenv	Create a virtual environment named myenv
+# workon myenv			Activate the myenv environment
+# deactivate			Exit the active virtual environment
+# rmvirtualenv myenv	Delete myenv
+# lsvirtualenv			List all virtual environments
+# cdvirtualenv			Go to the active virtual environment's directory
+# cdsitepackages		Navigate to the site-packages directory
+
+
 
 conda_master() {
     local conda_path="$HOME/miniconda3/bin/conda"
     
     if [[ -x "$conda_path" ]]; then
-        eval "$("$conda_path" "shell.zsh" "hook")"
-        conda activate master_venv
+		eval "$("$conda_path" "shell.zsh" "hook")" # activate conda (base)
+		conda activate master_venv # activate conda (master_venv)
     else
         echo "❌ Error: Conda not found at $conda_path"
     fi
 }
+
+# possibly, you can just straight up do: "conda activate master_venv"
+# but that's only gonna happen if conda_path was exported to path
+# And that might fuck up some system wide install, because it tries to use that version of python
+# rather then your system wide python, which is what should be used for system updates and operation
+
+# Keeping the bellow commented out. With it commented out, conda activate master_venv won't work. because 
+# conda is unknown command. With it not commented out, it will work. But see warning paragraph above
+# export PATH="$HOME/miniconda3/bin/conda:$PATH"
+
 
 
 # ─────────────────────────────────────────────────────
@@ -129,9 +168,9 @@ conda_master() {
 # ─────────────────────────────────────────────────────
 
 alias cd="z" 
-# This requires z oxide. It's a much better cd
+# This requires z oxide. It's a much better cd (see source comment at top of file)
 
-alias ch='cd ~'
+alias ch='cd ~' # just doing cd will work by itself but idc
 alias cco="cd ~/.config"
 alias ce="cd ~/.config/eww"
 alias cf="cd ~/.config/fish"
@@ -144,13 +183,16 @@ alias cr="cd ~/.config/rofi"
 alias ctm="cd ~/.config/tmux"
 alias cz="cd ~/.config/zsh"
 alias cw="cd ~/.config/waybar"
+
+
 alias cdo="cd ~/Downloads"
 alias cdoc="cd ~/Documents"
 alias cm="cd ~/Music"
 alias cpi="cd ~/Pictures"
+alias cv="cd ~/Videos"
+
+
 alias chg="cd ~/home_for_git"
-
-
 alias ct="cd ~/.local/share/Trash/files"
 alias cs9="cd ~ ; cd sem9"
 alias cs1="cd ~/Documents/University (Real)/Semester 10/"
@@ -166,8 +208,6 @@ alias theme="kitty +kitten themes"
 alias bless="bat --color=always --paging=always"
 # replace cat with better cat
 alias cat="bat --paging=never --style=plain"
-
-
 
 # json files good looking
 alias jat="jq . |  bat --language json"
@@ -353,14 +393,20 @@ $JUNIT4_PATH/junit-4.13.2.jar"
 
 
 
+
+
+
+
 # ─────────────────────────────────────────────────────
 # 🔧 1️⃣1️⃣ General / Miscellaneous Shortcuts
 # ─────────────────────────────────────────────────────
 
+
+unalias r 2>/dev/null # it's for redoing. But fuck that, who needs redoing commands, just up arrow and enter
 # Reload Zsh configuration
 alias r="source ~/.zshrc"
 
-# Clear terminal
+# Clear terminal. Like on windows and it's faster to type
 alias cls="clear"
 
 # Open Zsh config in Neovim
@@ -399,7 +445,6 @@ alias disk="df -h"
 
 # See partition with names
 alias lsblk1="lsblk -o +PARTLABEL"
-
 
 # List all open ports
 alias ports="ss -tuln"
