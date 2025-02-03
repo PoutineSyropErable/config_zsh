@@ -33,6 +33,7 @@ brew install \
   fd \
   tmux \
   lf \
+  lcd \
   lazygit \
   neovim \
   exa \

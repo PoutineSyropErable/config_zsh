@@ -5,6 +5,9 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+# Add this (replace false to true ) in ~/.p10k.zsh 
+# typeset -g POWERLEVEL9K_STATUS_ERROR=true
+
 # ─────────────────────────────────────────────────────
 # 🛠️ 1️⃣ Zsh & Environment Configuration
 # ─────────────────────────────────────────────────────
@@ -19,7 +22,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Plugins
 plugins=(
-    virtualenvwrapper
+	virtualenvwrapper
     zsh-syntax-highlighting
 	zsh-autosuggestions
 )
@@ -168,7 +171,14 @@ conda_master() {
 # ─────────────────────────────────────────────────────
 
 alias cd="z" 
+alias ls="lsd" # better ls
 # This requires z oxide. It's a much better cd (see source comment at top of file)
+
+alias eva="eza" # another colored version of ls
+alias ll='lsd -al'
+alias la='lsd -a'
+alias lsdir='lsd -d */'
+alias lsa="lsd -a"
 
 alias ch='cd ~' # just doing cd will work by itself but idc
 alias cco="cd ~/.config"
@@ -430,6 +440,7 @@ alias keymod="cd ~/.config/nvim && nvim lua/core/keymaps.lua"
 
 
 
+alias ols="/usr/bin/ls"
 alias ovim="/usr/bin/vim"
 alias v="nvim"
 
