@@ -23,6 +23,13 @@ source $ZSH/oh-my-zsh.sh
 export TERMINAL=kitty
 export EDITOR=nvim
 
+# Disable automatic execution when pasting
+unsetopt BRACKETED_PASTE
+# bindkey -r '^[[200~'
+# bindkey -r '^[[201~'
+
+
+
 # ─────────────────────────────────────────────────────
 # 🛠️  Initialize CLI Tools (With Warnings)
 # ─────────────────────────────────────────────────────
@@ -94,6 +101,18 @@ alias pythonvenv="$HOME/MainPython_Virtual_Environment/pip_venv/bin/python"
 alias pv="pythonvenv"
 alias govenv="source $HOME/MainPython_Virtual_Environment/pip_venv/bin/activate"
 alias projvenv="source $HOME/MainPython_Virtual_Environment/project_venv/bin/activate"
+alias lvenv="deactivate"
+
+function conda_master
+	set conda_path "$HOME/miniconda3/bin/conda"
+	if test -x $conda_path
+		eval $conda_path "shell.fish" "hook" $argv | source
+		conda activate master_venv
+	else
+		echo "Error: Conda not found at $conda_path"
+	end
+end
+
 
 # ─────────────────────────────────────────────────────
 # 📁 4️⃣ Navigation & Directory Shortcuts
@@ -118,11 +137,15 @@ alias cm="cd ~/Music"
 alias cpi="cd ~/Pictures"
 alias chg="cd ~/home_for_git"
 
+
+
+
 # ─────────────────────────────────────────────────────
-# 🎨 5️⃣ Visual Enhancements
+# 🎨 5️⃣ Visual Enhancementss
 # ─────────────────────────────────────────────────────
 
 alias fview="bat ~/.fishrc"
+alias tview="bat ~/.tmuxrc"
 alias theme="kitty +kitten themes"
 alias bless="bat --color=always --paging=always"
 
@@ -204,13 +227,15 @@ fcdn() {
 # 🛠️ 9️⃣ Git Functions & Aliases
 # ─────────────────────────────────────────────────────
 
-alias ga="git add ."
-alias gdf="git diff --name-only"
-alias gcm="gc"
 
 gc() {
     git commit -m "$1"
 }
+
+alias ga="git add ."
+alias gdf="git diff --name-only"
+alias gcm="gc"
+
 
 git_do_all() {
     if [[ $# -eq 0 ]]; then
@@ -256,4 +281,67 @@ export CLASSPATH="$JUNIT5_PATH/junit-jupiter-api-5.11.3.jar:\
 $JUNIT5_PATH/junit-jupiter-engine-5.11.3.jar:\
 $JUNIT5_PATH/junit-jupiter-params-5.11.3.jar:\
 $JUNIT4_PATH/junit-4.13.2.jar"
+
+
+
+# ─────────────────────────────────────────────────────
+# 🔧 1️⃣1️⃣ General / Miscellaneous Shortcuts
+# ─────────────────────────────────────────────────────
+
+# Reload Zsh configuration
+alias r="source ~/.zshrc"
+
+# Clear terminal
+alias cls="clear"
+
+# Open Zsh config in Neovim
+alias zmod="nvim ~/.zshrc"
+
+# Open Fish config in Neovim
+alias fmod="nvim ~/.config/fish/config.fish"
+
+# Open Tmux config in Neovim
+alias tmod="nvim ~/.tmux.conf"
+
+# Get current public IP
+alias myip="curl -s https://ipinfo.io/ip"
+
+# Open Neovim config
+alias cnv="cd ~/.config/nvim && nvim ."
+alias nmod="cd ~/.config/nvim && nvim ."
+alias vmod="cd ~/.config/nvim && nvim ."
+alias keymod="cd ~/.config/nvim && nvim lua/core/keymaps.lua"
+
+# Safe file removal with confirmation
+# alias rm="rm -i"
+
+# Use bat instead of cat for better readability
+alias cat="bat --paging=never --style=plain"
+
+# System information
+alias sysinfo="neofetch"
+
+# Check disk usage
+alias disk="df -h"
+
+# See partition with names
+alias lsblk1="lsblk -o +PARTLABEL"
+
+# json files good looking
+alias jat="jq . |  bat --language json"
+
+# List all open ports
+alias ports="ss -tuln"
+
+# Show processes in a tree format
+alias psg="ps auxf"
+
+# Copy current working directory to clipboard
+alias pwc="pwd | c"
+
+# Change directory to last visited
+alias back="cd -"
+
+# Open Kitty theme selector
+alias theme="kitty +kitten themes"
 
