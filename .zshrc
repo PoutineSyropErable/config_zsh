@@ -126,6 +126,9 @@ conda_master() {
 # 📁 4️⃣ Navigation & Directory Shortcuts
 # ─────────────────────────────────────────────────────
 
+alias cd="z" 
+# This requires z oxide. It's a much better cd
+
 alias ch='cd ~'
 alias cco="cd ~/.config"
 alias ce="cd ~/.config/eww"
@@ -146,6 +149,10 @@ alias cpi="cd ~/Pictures"
 alias chg="cd ~/home_for_git"
 
 
+alias ct="cd ~/.local/share/Trash/files"
+alias cs9="cd ~ ; cd sem9"
+alias cs1="cd ~/Documents/University (Real)/Semester 10/"
+alias cs10="cs1"
 
 # ─────────────────────────────────────────────────────
 # 🎨 5️⃣ Visual Enhancementss
