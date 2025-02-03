@@ -39,21 +39,23 @@ export EDITOR=nvim
 # 🛠️  Initialize CLI Tools (With Warnings)
 # ─────────────────────────────────────────────────────
 
-# Initialize thefuck
+# Initialize thefuck, when you make an error in terminal, type fuck and it will give you the correction
 if ! eval "$(thefuck --alias)"; then
     echo "⚠️ Warning: Failed to initialize 'thefuck'"
 fi
 
-# Initialize zoxide
+# Initialize zoxide. You don't need perfect path for cd. You can cd "bunch of keywords" and it will find the dir 
 if ! eval "$(zoxide init zsh)"; then
     echo "⚠️ Warning: Failed to initialize 'zoxide'"
 fi
 
-# Initialize atuin
+# Initialize atuin. Makes the command history good and not suck. Control R works.
+# I disabled up arrows but you can change that
 if ! eval "$(atuin init zsh --disable-up-arrow)"; then
     echo "⚠️ Warning: Failed to initialize 'atuin'"
 fi
 
+# Allow q for cd and quit
 # Source LF Configuration (With Error Handling)
 if [[ -f ~/.config/lf/lf.zsh ]]; then
     if ! source ~/.config/lf/lf.zsh; then
@@ -162,7 +164,13 @@ alias fview="bat ~/.fishrc"
 alias tview="bat ~/.tmuxrc"
 alias theme="kitty +kitten themes"
 alias bless="bat --color=always --paging=always"
+# replace cat with better cat
+alias cat="bat --paging=never --style=plain"
 
+
+
+# json files good looking
+alias jat="jq . |  bat --language json"
 # ─────────────────────────────────────────────────────
 # 🔀 6️⃣ TMUX Configuration
 # ─────────────────────────────────────────────────────
@@ -196,14 +204,28 @@ tswap() {
 # 🔎 7️⃣ File Search & Clipboard Commands
 # ─────────────────────────────────────────────────────
 
+# Search a file with fzf, see its preview, and open it in 
+# neovim to edit it
 fzfv() {
     nvim "$(fzf -m --preview='bat --color=always {}')"
 }
+
+# search for files with fzf with image preview and paste it to clipboard
 fzfc() {
     fzf -m --preview='feh {}' | c
 }
+
+# copy a file text content to clipboard
 fcc() {
     cat "$@" | c
+}
+
+
+# Find files with a name containing the given argument (case-insensitive)
+# This is dumb compared to the others but hey... 
+# it could have a use
+findc() {
+    find . -iname "*$1*"
 }
 
 # ─────────────────────────────────────────────────────
@@ -238,6 +260,8 @@ fcdn() {
     dir=$(fd -t d --hidden -d "$depth" "$search_term" | fzf)
     [[ -n "$dir" ]] && cd "$dir"
 }
+
+
 
 # ─────────────────────────────────────────────────────
 # 🛠️ 9️⃣ Git Functions & Aliases
@@ -352,16 +376,20 @@ alias tmod="nvim ~/.tmux.conf"
 alias myip="curl -s https://ipinfo.io/ip"
 
 # Open Neovim config
+alias cn="cd ~/.config/nvim"
 alias cnv="cd ~/.config/nvim && nvim ."
 alias nmod="cd ~/.config/nvim && nvim ."
 alias vmod="cd ~/.config/nvim && nvim ."
 alias keymod="cd ~/.config/nvim && nvim lua/core/keymaps.lua"
 
+
+
+alias ovim="/usr/bin/vim"
+alias v="nvim"
+
 # Safe file removal with confirmation
 # alias rm="rm -i"
 
-# Use bat instead of cat for better readability
-alias cat="bat --paging=never --style=plain"
 
 # System information
 alias sysinfo="neofetch"
@@ -372,8 +400,6 @@ alias disk="df -h"
 # See partition with names
 alias lsblk1="lsblk -o +PARTLABEL"
 
-# json files good looking
-alias jat="jq . |  bat --language json"
 
 # List all open ports
 alias ports="ss -tuln"
@@ -387,8 +413,19 @@ alias pwc="pwd | c"
 # Change directory to last visited
 alias back="cd -"
 
-# Open Kitty theme selector
-alias theme="kitty +kitten themes"
 
+alias et="exit"
+alias lg="lazygit"
+alias bottom="btm"
+alias timeshift-wayland="sudo -E timeshift-gtk"
+
+
+c_debug() {
+    ulimit -c unlimited
+    echo "core.%e.%p" | sudo tee /proc/sys/kernel/core_pattern
+}
+# When a C program crash, it will dump the core file in the current dir, so you can use it for gdb
+
+#---------------------------------------- END OF FILE ---------
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
