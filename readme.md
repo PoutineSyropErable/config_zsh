@@ -1,5 +1,6 @@
-check ./install_commands.sh, but don't really execute it. Maybe executing it will work, you'll most likely have to copy and paste
-it's content one line at a time.
+Here's what it looks like
+
+![Example of zsh config Image](Example.png)
 
 Also, to install do:
 
@@ -14,3 +15,6 @@ zsh
 ```
 
 then copy the commands from install commands.sh
+
+Aka: check ./install_commands.sh, but don't really execute it. Maybe executing it will work, you'll most likely have to copy and paste
+it's content one line at a time.
