@@ -1,3 +1,10 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
 # ─────────────────────────────────────────────────────
 # 🛠️ 1️⃣ Zsh & Environment Configuration
 # ─────────────────────────────────────────────────────
@@ -6,15 +13,18 @@
 export ZSH="$HOME/.oh-my-zsh"
 
 # Set Theme
-ZSH_THEME="fletcherm"
+# ZSH_THEME="fletcherm"
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
 
 # Plugins
 plugins=(
-    git
     virtualenvwrapper
-    zsh-autosuggestions
     zsh-syntax-highlighting
+	zsh-autosuggestions
 )
+
+    # git
 
 # Source Oh My Zsh
 source $ZSH/oh-my-zsh.sh
@@ -22,11 +32,6 @@ source $ZSH/oh-my-zsh.sh
 # Terminal & Editor Settings
 export TERMINAL=kitty
 export EDITOR=nvim
-
-# Disable automatic execution when pasting
-unsetopt BRACKETED_PASTE
-# bindkey -r '^[[200~'
-# bindkey -r '^[[201~'
 
 
 
@@ -93,6 +98,8 @@ else
     echo "Warning: Unknown display server or unsupported OS!"
 fi
 
+
+
 # ─────────────────────────────────────────────────────
 # 🚀 3️⃣ Python Virtual Environments
 # ─────────────────────────────────────────────────────
@@ -103,15 +110,16 @@ alias govenv="source $HOME/MainPython_Virtual_Environment/pip_venv/bin/activate"
 alias projvenv="source $HOME/MainPython_Virtual_Environment/project_venv/bin/activate"
 alias lvenv="deactivate"
 
-function conda_master
-	set conda_path "$HOME/miniconda3/bin/conda"
-	if test -x $conda_path
-		eval $conda_path "shell.fish" "hook" $argv | source
-		conda activate master_venv
-	else
-		echo "Error: Conda not found at $conda_path"
-	end
-end
+conda_master() {
+    local conda_path="$HOME/miniconda3/bin/conda"
+    
+    if [[ -x "$conda_path" ]]; then
+        eval "$("$conda_path" "shell.zsh" "hook")"
+        conda activate master_venv
+    else
+        echo "❌ Error: Conda not found at $conda_path"
+    fi
+}
 
 
 # ─────────────────────────────────────────────────────
@@ -136,7 +144,6 @@ alias cdoc="cd ~/Documents"
 alias cm="cd ~/Music"
 alias cpi="cd ~/Pictures"
 alias chg="cd ~/home_for_git"
-
 
 
 
@@ -176,6 +183,8 @@ tswap() {
     tmux swap-pane -s "$pane1" -t "$pane2"
 }
 
+
+
 # ─────────────────────────────────────────────────────
 # 🔎 7️⃣ File Search & Clipboard Commands
 # ─────────────────────────────────────────────────────
@@ -186,7 +195,7 @@ fzfv() {
 fzfc() {
     fzf -m --preview='feh {}' | c
 }
-fc() {
+fcc() {
     cat "$@" | c
 }
 
@@ -227,16 +236,17 @@ fcdn() {
 # 🛠️ 9️⃣ Git Functions & Aliases
 # ─────────────────────────────────────────────────────
 
+# Ensure no alias conflict before defining functions
+unalias gc 2>/dev/null
+unalias ga 2>/dev/null
+unalias gcm 2>/dev/null
 
+# Commit with a message
 gc() {
     git commit -m "$1"
 }
 
-alias ga="git add ."
-alias gdf="git diff --name-only"
-alias gcm="gc"
-
-
+# Add, commit, and push with a message
 git_do_all() {
     if [[ $# -eq 0 ]]; then
         echo "Usage: git_do_all <commit_message>"
@@ -248,25 +258,53 @@ git_do_all() {
     git push origin "$(git branch --show-current)"
 }
 
+# Commit & push all submodules and main repo
 git_push_all_msg() {
     if [[ $# -eq 0 ]]; then
         echo "Error: Commit message is required."
         return 1
     fi
     local commit_message="$1"
+
+    echo "🔄 Processing all submodules..."
+    echo "________________________________"
+
     git submodule foreach --recursive '
+        echo "Updating submodule $name..."
         git add --all
         git commit -m "'"$commit_message"'" || echo "No changes to commit"
         git push origin $(git branch --show-current)
+        echo "________________________________"
     '
+
+    echo "🚀 Processing the main repository..."
     git add --all
     git commit -m "$commit_message" || echo "No changes to commit in root repository"
-    git push origin "$(git branch --show-current)"
+    git push --recurse-submodules=on-demand origin "$(git branch --show-current)"
 }
 
+# Push all with a hardcoded commit message
 git_push_all() {
     git_push_all_msg "super push, root git dir and all submodules"
 }
+
+# ─────────────────────────────────────────────────────
+# ⚡ Git Aliases for Quick Commands
+# ─────────────────────────────────────────────────────
+
+alias ga="git add ."
+alias gcm="gc"
+alias gdf="git diff --name-only"
+
+alias gpd="git push origin desktop"
+alias gpl="git push origin laptop"
+alias gpm="git push origin master"
+alias gpmn="git push origin main"
+
+alias gpam="git_push_all_msg"
+alias gpa="git_push_all"
+
+alias gda="git_do_all"
 
 # ─────────────────────────────────────────────────────
 # 🌎 🔧 1️⃣0️⃣ System Paths & JUnit Setup
@@ -345,3 +383,5 @@ alias back="cd -"
 # Open Kitty theme selector
 alias theme="kitty +kitten themes"
 
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
