@@ -261,8 +261,12 @@ fzfv() {
 }
 
 # search for files with fzf with image preview and paste it to clipboard
-fzfc() {
+fzfi() {
     fzf -m --preview='feh {}' | c
+}
+
+fzfc() {
+    fzf -m --preview='bat --color=always {}' | c
 }
 
 # copy a file text content to clipboard
@@ -465,6 +469,9 @@ alias psg="ps auxf"
 
 # Copy current working directory to clipboard
 alias pwc="pwd | c"
+alias pwp='cd "$(p)"'
+alias pwv="pwp"
+alias prevc="history --max=1 | c"
 
 # Change directory to last visited
 alias back="cd -"
