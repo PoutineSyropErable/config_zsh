@@ -217,10 +217,11 @@ alias cir="cd ~/.config/ironbar"
 alias cka="cd ~/.config/kanata"
 alias cki="cd ~/.config/kitty"
 alias clf="cd ~/.config/lf"
+alias cP="cd ~/.config/polybar.old/"
 alias cr="cd ~/.config/rofi"
 alias ctm="cd ~/.config/tmux"
-alias cz="cd ~/.config/zsh"
 alias cw="cd ~/.config/waybar"
+alias cz="cd ~/.config/zsh"
 
 
 alias cdo="cd ~/Downloads"
