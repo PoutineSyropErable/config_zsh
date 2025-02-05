@@ -36,6 +36,11 @@ source $ZSH/oh-my-zsh.sh
 export TERMINAL=kitty
 export EDITOR=nvim
 
+alias v="nvim"
+alias vim="nvim"
+alias ovim="/usr/bin/vim"
+
+
 alias svim="sudo -E nvim"
 # fuck nano!
 alias nano="nvim"
@@ -192,9 +197,10 @@ conda_master() {
 # 📁 4️⃣ Navigation & Directory Shortcuts
 # ─────────────────────────────────────────────────────
 
-alias cd="z" 
-alias ls="lsd" # better ls
 # This requires z oxide. It's a much better cd (see source comment at top of file)
+alias cd="z"  # better cd
+alias ls="lsd" # better ls
+alias ols="/usr/bin/ls"
 
 alias eva="eza" # another colored version of ls
 alias ll='lsd -al'
@@ -202,7 +208,7 @@ alias la='lsd -a'
 alias lsdir='lsd -d */'
 alias lsa="lsd -a"
 
-alias ch='cd ~' # just doing cd will work by itself but idc
+alias ch='cd ~' # just doing "cd" will work by itself but idc
 alias cco="cd ~/.config"
 alias ce="cd ~/.config/eww"
 alias cf="cd ~/.config/fish"
@@ -231,18 +237,33 @@ alias cs1="cd ~/Documents/University (Real)/Semester 10/"
 alias cs10="cs1"
 
 # ─────────────────────────────────────────────────────
-# 🎨 5️⃣ Visual Enhancementss
+#   5️⃣  Config  Files Modification
 # ─────────────────────────────────────────────────────
+
+alias amod="vim ~/.config/awesome/rc.lua"
+alias bmod="vim ~/.bashrc"
+alias cmod="vim ~/.config/conky/show_all/show_all_conf"
+alias fmod="nvim ~/.config/fish/config.fish"
+alias hmod="cd ~/.config/hypr && vim hyprland.conf"
+alias imod="vim ~/.i3rc"
+alias irmod="cd ~/.config/ironbar && vim ~/.config/ironbar/"
+alias kamod="vim ~/.config/kanata/kanata.kbd"
+alias kimod="vim ~/.config/kitty/kitty.conf"
+alias keymod="cd ~/.config/nvim && nvim lua/core/keymaps.lua"
+alias mmod="vim ~/.config/mpd/mpd.conf"
+alias ncmod="vim ~/.ncmpcpp/config"
+alias nmod="cd ~/.config/nvim && nvim ."
+alias pmod="vim ~/.config/polybar.old/config"
+alias smod="vim ~/.config/sway/config"
+alias tmod="nvim ~/.tmux.conf"
+alias vmod="cd ~/.config/nvim && nvim ."
+alias wmod="cd ~/.config/waybar && vim ~/.config/waybar/"
+alias zmod="nvim ~/.zshrc"
 
 alias fview="bat ~/.fishrc"
 alias tview="bat ~/.tmuxrc"
-alias theme="kitty +kitten themes"
-alias bless="bat --color=always --paging=always"
-# replace cat with better cat
-alias cat="bat --paging=never --style=plain"
 
-# json files good looking
-alias jat="jq . |  bat --language json"
+
 # ─────────────────────────────────────────────────────
 # 🔀 6️⃣ TMUX Configuration
 # ─────────────────────────────────────────────────────
@@ -447,17 +468,12 @@ alias r="source ~/.zshrc"
 # Clear terminal. Like on windows and it's faster to type
 alias cls="clear"
 
-# Open Zsh config in Neovim
-alias zmod="nvim ~/.zshrc"
+alias theme="kitty +kitten themes"
+alias bless="bat --color=always --paging=always"
+alias cat="bat --paging=never --style=plain" # replace cat with better cat
 
-# Open Fish config in Neovim
-alias fmod="nvim ~/.config/fish/config.fish"
-
-# Open Tmux config in Neovim
-alias tmod="nvim ~/.tmux.conf"
-
-# Open Hyprland config in Neovim:
-alias hmod="cd ~/.config/hypr ; vim hyprland.conf"
+# json files good looking
+alias jat="jq . |  bat --language json"
 
 # Get current public IP
 alias myip="curl -s https://ipinfo.io/ip"
@@ -465,15 +481,9 @@ alias myip="curl -s https://ipinfo.io/ip"
 # Open Neovim config
 alias cn="cd ~/.config/nvim"
 alias cnv="cd ~/.config/nvim && nvim ."
-alias nmod="cd ~/.config/nvim && nvim ."
-alias vmod="cd ~/.config/nvim && nvim ."
-alias keymod="cd ~/.config/nvim && nvim lua/core/keymaps.lua"
 
 
 
-alias ols="/usr/bin/ls"
-alias ovim="/usr/bin/vim"
-alias v="nvim"
 
 # Safe file removal with confirmation
 # alias rm="rm -i"
