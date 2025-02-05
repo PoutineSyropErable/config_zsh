@@ -184,7 +184,7 @@ alias ch='cd ~' # just doing cd will work by itself but idc
 alias cco="cd ~/.config"
 alias ce="cd ~/.config/eww"
 alias cf="cd ~/.config/fish"
-alias chy="cd ~/.config/hypr"
+alias cH="cd ~/.config/hypr"
 alias cir="cd ~/.config/ironbar"
 alias cka="cd ~/.config/kanata"
 alias cki="cd ~/.config/kitty"
@@ -431,6 +431,9 @@ alias fmod="nvim ~/.config/fish/config.fish"
 
 # Open Tmux config in Neovim
 alias tmod="nvim ~/.tmux.conf"
+
+# Open Hyprland config in Neovim:
+alias hmod="cd ~/.config/hypr ; vim hyprland.conf"
 
 # Get current public IP
 alias myip="curl -s https://ipinfo.io/ip"
