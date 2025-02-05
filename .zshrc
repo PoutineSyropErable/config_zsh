@@ -36,6 +36,19 @@ source $ZSH/oh-my-zsh.sh
 export TERMINAL=kitty
 export EDITOR=nvim
 
+alias svim="sudo -E nvim"
+# fuck nano!
+alias nano="nvim"
+sudo() {
+    if [[ $# -gt 0 && "$1" == "nano" ]]; then
+        command sudo -E nvim "${@:2}"
+    else
+        command sudo "$@"
+    fi
+}
+
+
+
 
 
 # ─────────────────────────────────────────────────────
@@ -142,6 +155,15 @@ source $(which virtualenvwrapper.sh)
 # cdvirtualenv			Go to the active virtual environment's directory
 # cdsitepackages		Navigate to the site-packages directory
 
+conda_activate() {
+    local conda_path="$HOME/miniconda3/bin/conda"
+    
+    if [[ -x "$conda_path" ]]; then
+		eval "$("$conda_path" "shell.zsh" "hook")" # activate conda (base)
+    else
+        echo "❌ Error: Conda not found at $conda_path"
+    fi
+}
 
 
 conda_master() {
@@ -362,6 +384,8 @@ git_push_all_msg() {
         echo "________________________________"
     '
 
+	echo ""
+    echo "________________________________"
     echo "🚀 Processing the main repository..."
     git add --all
     git commit -m "$commit_message" || echo "No changes to commit in root repository"
