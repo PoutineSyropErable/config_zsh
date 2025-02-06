@@ -484,6 +484,9 @@ alias cn="cd ~/.config/nvim"
 alias cnv="cd ~/.config/nvim && nvim ."
 
 
+# Arch Install commands
+alias sp="sudo pacman -S"
+alias yp="yay -S"
 
 
 # Safe file removal with confirmation

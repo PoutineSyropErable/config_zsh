@@ -17,6 +17,7 @@ git clone https://github.com/PoutineSyropErable/config_zsh ~/.config/zsh
 # Create a symbolic link only if the cloned .zshrc exists
 ln -s ~/.config/zsh/.zshrc ~/.zshrc
 
+cd ~/.config/zsh
 
 
 zsh
