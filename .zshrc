@@ -41,6 +41,7 @@ alias vim="nvim"
 alias ovim="/usr/bin/vim"
 
 
+alias slf="sudo -E lf"
 alias svim="sudo -E nvim"
 # fuck nano!
 alias nano="nvim"
@@ -450,6 +451,13 @@ export CLASSPATH="$JUNIT5_PATH/junit-jupiter-api-5.11.3.jar:\
 $JUNIT5_PATH/junit-jupiter-engine-5.11.3.jar:\
 $JUNIT5_PATH/junit-jupiter-params-5.11.3.jar:\
 $JUNIT4_PATH/junit-4.13.2.jar"
+
+export JAVA_HOME=/usr/lib/jvm/java-23-openjdk
+export PATH_TO_FX="/usr/lib/jvm/javafx-sdk-23.0.2/lib"
+export PATH="$JAVA_HOME/bin:$PATH"
+export PATH="$HOME/.local/bin/JetUML/:$PATH"
+
+
 
 
 
