@@ -303,8 +303,10 @@ tswap() {
 # Search a file with fzf, see its preview, and open it in 
 # neovim to edit it
 fzfv() {
-    nvim "$(fzf -m --preview='bat --color=always {}')"
+    nvim "$(fzf -m --preview='bat --color=always {} .')"
 }
+
+alias fv="fzfv"
 
 # search for files with fzf with image preview and paste it to clipboard
 fzfi() {
@@ -453,15 +455,11 @@ $JUNIT5_PATH/junit-jupiter-engine-5.11.3.jar:\
 $JUNIT5_PATH/junit-jupiter-params-5.11.3.jar:\
 $JUNIT4_PATH/junit-4.13.2.jar"
 
-export JAVA_HOME=/usr/lib/jvm/java-23-openjdk
-export PATH_TO_FX="/usr/lib/jvm/javafx-sdk-23/lib"
+JAVA_PATH="$HOME/.local/java"
+export JAVA_HOME="$JAVA_PATH/java-23-openjdk"
+export PATH_TO_FX="$JAVA_PATH/javafx-sdk-23/lib"
 export PATH="$JAVA_HOME/bin:$PATH"
-export PATH="$HOME/.local/bin/JetUML/:$PATH"
-
-
-
-
-
+export PATH="$JAVA_PATH:$PATH"
 
 
 
@@ -538,6 +536,42 @@ c_debug() {
     echo "core.%e.%p" | sudo tee /proc/sys/kernel/core_pattern
 }
 # When a C program crash, it will dump the core file in the current dir, so you can use it for gdb
+
+
+# ─────────────────────────────────────────────────────
+# 🛠️ Zsh Functions for Background Execution with Logging
+# ─────────────────────────────────────────────────────
+
+# Function to execute a command in the background without logging
+execp() {
+    nohup "$@" > /dev/null 2>&1 &
+}
+
+# Function to execute a command in the background with logging
+execpl() {
+    mkdir -p "$HOME/.config/execp_logs"
+    log_file="$HOME/.config/execp_logs/${1%% *}.log"
+
+    printf "\n\n--------------------(%s)--------------------\n\n" "$(date)" >> "$log_file"
+
+    nohup "$@" >> "$log_file" 2>&1 &
+}
+
+# Function to execute a command in the background using systemd
+execpl_systemd() {
+    mkdir -p "$HOME/.config/execp_logs"
+    log_file="$HOME/.config/execp_logs/${1%% *}.log"
+
+    printf "\n\n--------------------(%s)--------------------\n\n" "$(date)" >> "$log_file"
+
+    systemd-run --user --unit="${1%% *}" --output=append:"$log_file" "$@"
+}
+
+# Alias to use systemd-based execution by default
+alias execpl='execpl_systemd'
+
+
+
 
 #---------------------------------------- END OF FILE ---------
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
