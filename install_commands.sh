@@ -36,7 +36,7 @@ else
 fi
 
 #On arch: (Use yay or paru if you want lf-sixel-git)
-if [ SYSTEM == "arch"]; then
+if [ SYSTEM == "arch" ]; then
 	pacman -S --needed \
 		zoxide \
 		atuin \
@@ -64,7 +64,7 @@ fi
 
 # maybe brew will failed to install some of them, if it does, just remove it untill it can install as much as possible
 # I don't have mac, but for you guys it should be this (I hope)
-if [ SYSTEM == "macOS"]; then
+if [ SYSTEM == "macOS" ]; then
 	brew install \
 		zoxide \
 		atuin \
