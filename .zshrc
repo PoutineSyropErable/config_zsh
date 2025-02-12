@@ -434,6 +434,7 @@ alias gdf="git diff --name-only"
 alias gpd="git push origin desktop"
 alias gpl="git push origin laptop"
 alias gpm="git push origin master"
+alias gpu="git pull origin master"
 alias gpmn="git push origin main"
 
 alias gpam="git_push_all_msg"
