@@ -549,7 +549,7 @@ execp() {
 }
 
 # Function to execute a command in the background with logging
-execpl() {
+execpl_nohup() {
     mkdir -p "$HOME/.config/execp_logs"
     log_file="$HOME/.config/execp_logs/${1%% *}.log"
 
@@ -569,10 +569,10 @@ execpl_systemd() {
 }
 
 # Alias to use systemd-based execution by default
-alias execpl='execpl_systemd'
+alias execpl='execpl_nohup'
 
 
-
+alias eth="execp thunar ."
 
 #---------------------------------------- END OF FILE ---------
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
