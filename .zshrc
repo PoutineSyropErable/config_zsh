@@ -41,6 +41,7 @@ export EDITOR=nvim
 alias v="nvim"
 alias vim="nvim"
 alias ovim="/usr/bin/vim"
+alias pvim="nvim --startuptime ~/.config/nvim_logs/startup.log"
 
 
 alias slf="sudo -E lf"
