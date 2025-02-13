@@ -433,8 +433,8 @@ alias gdf="git diff --name-only"
 
 alias gpd="git push origin desktop"
 alias gpl="git push origin laptop"
-alias gpm="git push origin master"
-alias gpu="git pull origin master"
+alias gpm="git push origin \$(git branch --show-current)"
+alias gpu="git pull origin \$(git branch --show-current)"
 alias gpmn="git push origin main"
 
 alias gpam="git_push_all_msg"
@@ -489,7 +489,7 @@ alias myip="curl -s https://ipinfo.io/ip"
 
 # Open Neovim config
 alias cn="cd ~/.config/nvim"
-alias cnv="cd ~/.config/nvim && nvim ."
+alias cnv="cd ~/.config/nvim "
 
 
 # Arch Install commands
@@ -573,6 +573,11 @@ alias execpl='execpl_nohup'
 
 
 alias eth="execp thunar ."
+
+
+# -------- Weird stuff V2: Latex Boogaloo
+export CHKTEXRC=/usr/local/etc/chktexrc
+
 
 #---------------------------------------- END OF FILE ---------
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
