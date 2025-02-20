@@ -487,7 +487,7 @@ git_clone_nonlocal() {
     fi
 }
 
-
+alias git_nonlocal_clone="git_clone_nonlocal"
 
 git_filter_remove_dryrun() {
     if [[ $# -eq 0 ]]; then
