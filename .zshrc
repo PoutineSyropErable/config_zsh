@@ -499,32 +499,51 @@ git_filter_remove_dryrun() {
 
     local files_to_check=()
 
+    echo ""
+    echo "🔍 Dry Run: Checking which files exist in history..."
+    echo ""
+
     # Check if each file exists in Git history
     for file in "$@"; do
         if git log --name-only --pretty=format: | sort -u | grep -qx "$file"; then
             files_to_check+=("$file")
+            echo "✅ File Found: $file"
+            echo "📜 Affected Commits:"
+            git log --oneline --name-only --pretty=format:"%h %s" | grep -B 1 "$file" | awk '!seen[$0]++'
+            echo "--------------------------------------"
         else
-            echo "⚠️ Warning: '$file' does not exist in Git history. Skipping."
+            echo "❌ Warning: '$file' does not exist in Git history. Exiting to be safe."
+			return 1
         fi
     done
 
-    # If no files exist in history, exit safely
+    # If no files exist, exit safely
     if [[ ${#files_to_check[@]} -eq 0 ]]; then
-        echo "❌ Error: No valid files found in Git history. Aborting."
+        echo "❌ No valid files found in Git history. Aborting."
         return 1
     fi
 
-    echo "🔍 Dry Run: The following files would be removed from history:"
-    for file in "${files_to_check[@]}"; do
-        git log --oneline --name-only --pretty=format:"%h %s" | grep -B 1 "$file" | awk '!seen[$0]++'
-    done
+    echo ""
+    echo "🚀 Running `git filter-repo --dry-run` simulation..."
+    echo ""
+
+    # Run git filter-repo in dry-run mode
+    git filter-repo --invert-paths --dry-run --path "${files_to_check[@]}"
+
+    echo ""
+    echo "✅ Dry run complete. No changes were made."
 }
+
+
 
 git_filter_remove() {
     if [[ $# -eq 0 ]]; then
         echo "Usage: git_filter_remove <file-or-directory> [<file2> <file3> ...]"
         return 1
     fi
+
+	printf "\n Are you in a non-local clone, use git_clone_nonlocal first, and filter remove there, then push from there.\n\n"
+
 
     local files_to_remove=()
 
@@ -546,11 +565,11 @@ git_filter_remove() {
     fi
 
     # Confirm before running filter-repo
-    echo "🚀 Removing files from history:"
+    echo "🚀 The following files will be removed from history:"
 	echo "${files_to_remove[*]}"
 	echo ""
     echo "⚠️ This will PERMANENTLY rewrite commit history."
-	read "confirm?Are you sure? (yes/no): "
+	read "confirm?Are you sure? This will proceed to a dry-run(yes/no): "
 	#confirm is the variable name in zsh
 
     if [[ "$confirm" != "yes" ]]; then
@@ -558,6 +577,25 @@ git_filter_remove() {
         return 1
     fi
 
+
+	# Call the dry-run function first
+    git_filter_remove_dryrun "$@" || printf "\n Are you in a non-local clone, use git_clone_nonlocal first, and filter remove there then push from there.\n\n"
+
+	echo ""
+	echo ""
+	echo ""
+	echo "🟡 Warning, this is the last check, if you do yes, it will do permanent removal."
+	read "confirm_dry_run?Does this look like the output of a correct dry-run?(yes/no): "
+    if [[ "$confirm_dry_run" != "yes" ]]; then
+        echo "❌ Manually Aborted."
+        return 1
+    fi
+
+
+
+	echo ""
+	echo ""
+	echo ""
     # Remove files from history using git filter-repo
     git filter-repo --invert-paths --path "${files_to_remove[@]}"
 
