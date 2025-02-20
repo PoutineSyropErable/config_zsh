@@ -44,6 +44,7 @@ alias ovim="/usr/bin/vim"
 alias pvim="nvim --startuptime ~/.config/nvim_logs/startup.log"
 
 
+bindkey -s '^F' 'lf\n'
 alias slf="sudo -E lf"
 alias svim="sudo -E nvim"
 # fuck nano!
@@ -443,6 +444,123 @@ alias gpa="git_push_all"
 
 alias gda="git_do_all"
 
+
+
+##### THE FOLLOWING TWO FUNCTION, git_clone_nonlocal, and git_filter_remove are for securely rewritting the commit history to 
+# remove a file from ever having been inside of it. Useful if you accidentally push your api key like a dumbass, or git add and commit 
+# a huge file by doing git add ., and now it's been 10 commits and 10 hours of works, and so unless you want to go back on all that work, 
+# you have to filter repo the project and remove it from history, this is to have a safe way to do it. And since you can't push due to the big file
+#... then you also need to make a local clones, but it must not use hardlinks. 
+git_clone_nonlocal() {
+    # Ensure we are inside a Git repository
+    if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+        echo "Error: Not inside a Git repository."
+        return 1
+    fi
+
+    # Get the absolute path of the Git repository root
+    repo_path=$(git rev-parse --show-toplevel)
+    repo_name=$(basename "$repo_path")
+
+    # Get the absolute path of the directory above the Git repository
+    clone_parent=$(realpath "$(dirname "$repo_path")")  # Convert to absolute path
+    clone_path="${clone_parent}/${repo_name}_clone"
+
+    # Prevent overwriting if the directory already exists
+    if [[ -d "$clone_path" ]]; then
+        echo "Error: '$clone_path' already exists. Choose a different name or remove it."
+        return 1
+    fi
+
+    # Perform the non-local clone
+    echo "Cloning '$repo_name' to '$clone_path' (non-local clone)..."
+    git clone --no-local "$repo_path" "$clone_path"
+
+    # Verify success
+    if [[ -d "$clone_path/.git" ]]; then
+        echo "Success: Non-local clone created at '$clone_path'."
+    else
+        echo "Error: Cloning failed."
+        return 1
+    fi
+}
+
+
+
+
+
+git_filter_remove_dryrun() {
+    if [[ $# -eq 0 ]]; then
+        echo "Usage: git_filter_remove_dryrun <file-or-directory> [<file2> <file3> ...]"
+        return 1
+    fi
+
+    local files_to_check=()
+
+    # Check if each file exists in Git history
+    for file in "$@"; do
+        if git log --name-only --pretty=format: | sort -u | grep -qx "$file"; then
+            files_to_check+=("$file")
+        else
+            echo "⚠️ Warning: '$file' does not exist in Git history. Skipping."
+        fi
+    done
+
+    # If no files exist in history, exit safely
+    if [[ ${#files_to_check[@]} -eq 0 ]]; then
+        echo "❌ Error: No valid files found in Git history. Aborting."
+        return 1
+    fi
+
+    echo "🔍 Dry Run: The following files would be removed from history:"
+    for file in "${files_to_check[@]}"; do
+        git log --oneline --name-only --pretty=format:"%h %s" | grep -B 1 "$file" | awk '!seen[$0]++'
+    done
+}
+
+git_filter_remove() {
+    if [[ $# -eq 0 ]]; then
+        echo "Usage: git_filter_remove <file-or-directory> [<file2> <file3> ...]"
+        return 1
+    fi
+
+    local files_to_remove=()
+
+    # Check if each file exists in Git history before attempting removal
+    for file in "$@"; do
+        if git log --name-only --pretty=format: | sort -u | grep -qx "$file"; then
+            files_to_remove+=("$file")
+        else
+            echo "❌ Warning: '$file' does not exist in Git history. Exiting to be safe."
+			return 1
+        fi
+    done
+
+    # If no files exist, exit safely
+	# redundant but fuck it
+    if [[ ${#files_to_remove[@]} -eq 0 ]]; then
+        echo "❌ Error: No valid files to remove. Aborting to prevent repository corruption."
+        return 1
+    fi
+
+    # Confirm before running filter-repo
+    echo "🚀 Removing files from history:"
+	echo "${files_to_remove[*]}"
+	echo ""
+    echo "⚠️ This will PERMANENTLY rewrite commit history."
+    read -p "Are you sure? (yes/no): " confirm
+    if [[ "$confirm" != "yes" ]]; then
+        echo "❌ Aborted."
+        return 1
+    fi
+
+    # Remove files from history using git filter-repo
+    git filter-repo --invert-paths --path "${files_to_remove[@]}"
+
+    echo "✅ Successfully removed files from Git history."
+}
+
+
 # ─────────────────────────────────────────────────────
 # 🌎 🔧 1️⃣0️⃣ System Paths & JUnit Setup
 # ─────────────────────────────────────────────────────
@@ -463,7 +581,8 @@ export PATH_TO_FX="$JAVA_PATH/javafx-sdk-23/lib"
 export PATH="$JAVA_HOME/bin:$PATH"
 export PATH="$JAVA_PATH:$PATH"
 
-
+alias jetuml="JetUML"
+alias jetUML="JetUML"
 
 
 # ─────────────────────────────────────────────────────
@@ -522,6 +641,12 @@ alias pwc="pwd | c"
 alias pwp='cd "$(p)"'
 alias pwv="pwp"
 alias prevc="history --max=1 | c"
+
+copy_history() {
+    local n=${1:-10}  # Default to 10 if no argument is given
+    history | tail -n "$n" | awk '{$1=""; print substr($0,2)}' | c  
+}
+
 
 # Change directory to last visited
 alias back="cd -"
