@@ -489,131 +489,154 @@ git_clone_nonlocal() {
 
 
 
-
-
 git_filter_remove_dryrun() {
     if [[ $# -eq 0 ]]; then
-        echo "Usage: git_filter_remove_dryrun <file-or-directory> [<file2> <file3> ...]"
+        echo "Usage: git_filter_remove_dryrun [--force] <file-or-directory> [<file2> ...]"
         return 1
     fi
 
     local files_to_check=()
+    local force_mode=false
+
+    # Parse arguments
+    for arg in "$@"; do
+        if [[ "$arg" == "--force" ]]; then
+            force_mode=true
+        else
+            files_to_check+=("$arg")
+        fi
+    done
 
     echo ""
     echo "🔍 Dry Run: Checking which files exist in history..."
     echo ""
 
-    # Check if each file exists in Git history
-    for file in "$@"; do
-        if git log --name-only --pretty=format: | sort -u | grep -qx "$file"; then
-            files_to_check+=("$file")
-            echo "✅ File Found: $file"
-            echo "📜 Affected Commits:"
-            git log --oneline --name-only --pretty=format:"%h %s" | grep -B 1 "$file" | awk '!seen[$0]++'
-            echo "--------------------------------------"
-        else
-            echo "❌ Warning: '$file' does not exist in Git history. Exiting to be safe."
-			return 1
-        fi
-    done
+    if [[ "$force_mode" == false ]]; then
+        local verified_files=()
+        for file in "${files_to_check[@]}"; do
+            if git log --name-only --pretty=format: | sort -u | grep -qx "$file"; then
+                verified_files+=("$file")
+                echo "✅ File Found: $file"
+                echo "📜 Affected Commits:"
+                git log --oneline --name-only --pretty=format:"%h %s" | grep -B 1 "$file" | awk '!seen[$0]++'
+                echo "--------------------------------------"
+            else
+                echo "❌ Warning: '$file' does not exist in Git history. Exiting to be safe."
+                return 1
+            fi
+        done
 
-    # If no files exist, exit safely
-    if [[ ${#files_to_check[@]} -eq 0 ]]; then
-        echo "❌ No valid files found in Git history. Aborting."
-        return 1
+        # If no files exist, exit safely
+        if [[ ${#verified_files[@]} -eq 0 ]]; then
+            echo "❌ No valid files found in Git history. Aborting."
+            return 1
+        fi
     fi
 
     echo ""
     echo "🚀 Running `git filter-repo --dry-run` simulation..."
     echo ""
 
-    # Run git filter-repo in dry-run mode
-    git filter-repo --invert-paths --dry-run --path "${files_to_check[@]}"
-	filter_repo_exit_code=$?
+    if [[ "$force_mode" == true ]]; then
+        git filter-repo --invert-paths --dry-run --force --path "${files_to_check[@]}"
+    else
+        git filter-repo --invert-paths --dry-run --path "${files_to_check[@]}"
+    fi
+    filter_repo_exit_code=$?
 
-	# Ensure the script exits if git filter-repo fails
-	if [[ $filter_repo_exit_code -ne 0 ]]; then
-		printf "\n❌ `git filter-repo --dry-run` failed. Aborting.\n"
-		printf "💡 If the file does not exist in history, there's nothing to remove."
-		printf "💡 This usually happens if you're not in a fresh clone.\n"
-		printf "🔄 Try running: git_clone_nonlocal\n\n"
-		return 1
-	fi
+    if [[ $filter_repo_exit_code -ne 0 ]]; then
+        printf "\n❌ `git filter-repo --dry-run` failed. Aborting.\n"
+        printf "💡 If the file does not exist in history, there's nothing to remove.\n"
+        printf "💡 This usually happens if you're not in a fresh clone.\n"
+        printf "🔄 Try running: git_clone_nonlocal\n\n"
+        return 1
+    fi
 
     echo ""
     echo "✅ Dry run complete. No changes were made."
 }
 
-
-
 git_filter_remove() {
     if [[ $# -eq 0 ]]; then
-        echo "Usage: git_filter_remove <file-or-directory> [<file2> <file3> ...]"
+        echo "Usage: git_filter_remove [--force] <file-or-directory> [<file2> ...]"
         return 1
     fi
 
-	printf "\n Are you in a non-local clone, use git_clone_nonlocal first, and filter remove there, then push from there.\n\n"
-
+    printf "\n Are you in a non-local clone? Use git_clone_nonlocal first, then filter remove there, and push from there.\n\n"
 
     local files_to_remove=()
+    local force_mode=false
 
-    # Check if each file exists in Git history before attempting removal
-    for file in "$@"; do
-        if git log --name-only --pretty=format: | sort -u | grep -qx "$file"; then
-            files_to_remove+=("$file")
+    # Parse arguments
+    for arg in "$@"; do
+        if [[ "$arg" == "--force" ]]; then
+            force_mode=true
         else
-            echo "❌ Warning: '$file' does not exist in Git history. Exiting to be safe."
-			return 1
+            files_to_remove+=("$arg")
         fi
     done
 
-    # If no files exist, exit safely
-	# redundant but fuck it
-    if [[ ${#files_to_remove[@]} -eq 0 ]]; then
-        echo "❌ Error: No valid files to remove. Aborting to prevent repository corruption."
-        return 1
+    if [[ "$force_mode" == false ]]; then
+        # Check if files exist in Git history before attempting removal
+        for file in "${files_to_remove[@]}"; do
+            if git log --name-only --pretty=format: | sort -u | grep -qx "$file"; then
+                echo "✅ File Found: $file"
+            else
+                echo "❌ Warning: '$file' does not exist in Git history. Exiting to be safe."
+                return 1
+            fi
+        done
     fi
 
-    # Confirm before running filter-repo
     echo "🚀 The following files will be removed from history:"
-	echo "${files_to_remove[*]}"
-	echo ""
+    echo "${files_to_remove[*]}"
+    echo ""
     echo "⚠️ This will PERMANENTLY rewrite commit history."
-	read "confirm?Are you sure? This will proceed to a dry-run(yes/no): "
-	#confirm is the variable name in zsh
+    read "confirm?Are you sure? This will proceed to a dry-run (yes/no): "
 
     if [[ "$confirm" != "yes" ]]; then
         echo "❌ Manually Aborted."
         return 1
     fi
 
+    # Call the dry-run function first
+    if [[ "$force_mode" == true ]]; then
+        git_filter_remove_dryrun --force "${files_to_remove[@]}" || {
+            printf "\n❌ Aborting due to dry-run failure.\n"
+            return 1
+        }
+    else
+        git_filter_remove_dryrun "${files_to_remove[@]}" || {
+            printf "\n❌ Aborting due to dry-run failure.\n"
+            return 1
+        }
+    fi
 
-	# Call the dry-run function first
-	git_filter_remove_dryrun "$@" || {
-    printf "\n❌ Aborting due to dry-run failure.\n"
-    return 1
-	}
-
-	echo ""
-	echo ""
-	echo ""
-	echo "🟡 Warning, this is the last check, if you do yes, it will do permanent removal."
-	read "confirm_dry_run?Does this look like the output of a correct dry-run?(yes/no): "
+    echo ""
+    echo ""
+    echo ""
+    echo "🟡 Warning: This is the last check. If you say yes, it will do permanent removal."
+    read "confirm_dry_run?Does this look like the output of a correct dry-run? (yes/no): "
     if [[ "$confirm_dry_run" != "yes" ]]; then
         echo "❌ Manually Aborted."
         return 1
     fi
 
-
-
-	echo ""
-	echo ""
-	echo ""
+    echo ""
+    echo ""
+    echo ""
     # Remove files from history using git filter-repo
-    git filter-repo --invert-paths --path "${files_to_remove[@]}"
+    if [[ "$force_mode" == true ]]; then
+        git filter-repo --invert-paths --force --path "${files_to_remove[@]}"
+    else
+        git filter-repo --invert-paths --path "${files_to_remove[@]}"
+    fi
 
     echo "✅ Successfully removed files from Git history."
 }
+
+
+
 
 
 # ─────────────────────────────────────────────────────
