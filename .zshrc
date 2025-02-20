@@ -579,7 +579,12 @@ git_filter_remove() {
 
 
 	# Call the dry-run function first
-    git_filter_remove_dryrun "$@" || printf "\n Are you in a non-local clone, use git_clone_nonlocal first, and filter remove there then push from there.\n\n"
+	git_filter_remove_dryrun "$@" || {
+    printf "\n❌ Aborting due to dry-run failure.\n"
+    printf "💡 If the file does not exist in history, there's nothing to remove.\n"
+    printf "🔄 Consider running: git_clone_nonlocal\n\n"
+    exit 1
+}
 
 	echo ""
 	echo ""
