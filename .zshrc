@@ -537,7 +537,7 @@ git_filter_remove_dryrun() {
 		printf "💡 If the file does not exist in history, there's nothing to remove."
 		printf "💡 This usually happens if you're not in a fresh clone.\n"
 		printf "🔄 Try running: git_clone_nonlocal\n\n"
-		exit 1
+		return 1
 	fi
 
     echo ""
@@ -591,7 +591,7 @@ git_filter_remove() {
 	# Call the dry-run function first
 	git_filter_remove_dryrun "$@" || {
     printf "\n❌ Aborting due to dry-run failure.\n"
-    exit 1
+    return 1
 	}
 
 	echo ""
