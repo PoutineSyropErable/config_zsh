@@ -529,6 +529,16 @@ git_filter_remove_dryrun() {
 
     # Run git filter-repo in dry-run mode
     git filter-repo --invert-paths --dry-run --path "${files_to_check[@]}"
+	filter_repo_exit_code=$?
+
+	# Ensure the script exits if git filter-repo fails
+	if [[ $filter_repo_exit_code -ne 0 ]]; then
+		printf "\n❌ `git filter-repo --dry-run` failed. Aborting.\n"
+		printf "💡 If the file does not exist in history, there's nothing to remove."
+		printf "💡 This usually happens if you're not in a fresh clone.\n"
+		printf "🔄 Try running: git_clone_nonlocal\n\n"
+		exit 1
+	fi
 
     echo ""
     echo "✅ Dry run complete. No changes were made."
@@ -581,10 +591,8 @@ git_filter_remove() {
 	# Call the dry-run function first
 	git_filter_remove_dryrun "$@" || {
     printf "\n❌ Aborting due to dry-run failure.\n"
-    printf "💡 If the file does not exist in history, there's nothing to remove.\n"
-    printf "🔄 Consider running: git_clone_nonlocal\n\n"
     exit 1
-}
+	}
 
 	echo ""
 	echo ""
