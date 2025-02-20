@@ -265,6 +265,8 @@ alias vmod="cd ~/.config/nvim && nvim ."
 alias wmod="cd ~/.config/waybar && vim ~/.config/waybar/"
 alias zmod="nvim ~/.zshrc"
 
+alias zview="bless ~/.zshrc"
+
 alias fview="bat ~/.fishrc"
 alias tview="bat ~/.tmuxrc"
 
@@ -548,9 +550,11 @@ git_filter_remove() {
 	echo "${files_to_remove[*]}"
 	echo ""
     echo "⚠️ This will PERMANENTLY rewrite commit history."
-    read -p "Are you sure? (yes/no): " confirm
+	read "confirm?Are you sure? (yes/no): "
+	#confirm is the variable name in zsh
+
     if [[ "$confirm" != "yes" ]]; then
-        echo "❌ Aborted."
+        echo "❌ Manually Aborted."
         return 1
     fi
 
