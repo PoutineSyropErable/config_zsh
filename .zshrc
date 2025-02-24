@@ -798,6 +798,13 @@ alias eth="execp thunar ."
 # -------- Weird stuff V2: Latex Boogaloo
 export CHKTEXRC=/usr/local/etc/chktexrc
 
+send_notification() {
+    /home/francois/MainPython_Virtual_Environment/pip_venv/bin/python \
+    /home/francois/Documents/PhoneNotification/send_notification.py \
+    --title="$1" --content="$2"
+}
+
+
 
 #---------------------------------------- END OF FILE ---------
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
