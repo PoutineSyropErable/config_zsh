@@ -8,7 +8,8 @@ fi
 # Add this (replace false to true ) in ~/.p10k.zsh 
 # typeset -g POWERLEVEL9K_STATUS_ERROR=true
 
-
+echo "missing to add local paths (and not just repo path for git filter_remove), though adding it might be a bad idea. Sleep on it and"
+echo "implement it later."
 
 # ─────────────────────────────────────────────────────
 # 🛠️ 1️⃣ Zsh & Environment Configuration
@@ -41,8 +42,10 @@ export EDITOR=nvim
 alias v="nvim"
 alias vim="nvim"
 alias ovim="/usr/bin/vim"
+alias pvim="nvim --startuptime ~/.config/nvim_logs/startup.log"
 
 
+bindkey -s '^F' 'lf\n'
 alias slf="sudo -E lf"
 alias svim="sudo -E nvim"
 # fuck nano!
@@ -263,6 +266,8 @@ alias vmod="cd ~/.config/nvim && nvim ."
 alias wmod="cd ~/.config/waybar && vim ~/.config/waybar/"
 alias zmod="nvim ~/.zshrc"
 
+alias zview="bless ~/.zshrc"
+
 alias fview="bat ~/.fishrc"
 alias tview="bat ~/.tmuxrc"
 
@@ -448,13 +453,207 @@ alias gdf="git diff --name-only"
 
 alias gpd="git push origin desktop"
 alias gpl="git push origin laptop"
-alias gpm="git push origin master"
+alias gpm="git push origin \$(git branch --show-current)"
+alias gpu="git pull origin \$(git branch --show-current)"
 alias gpmn="git push origin main"
 
 alias gpam="git_push_all_msg"
 alias gpa="git_push_all"
 
 alias gda="git_do_all"
+
+
+
+##### THE FOLLOWING TWO FUNCTION, git_clone_nonlocal, and git_filter_remove are for securely rewritting the commit history to 
+# remove a file from ever having been inside of it. Useful if you accidentally push your api key like a dumbass, or git add and commit 
+# a huge file by doing git add ., and now it's been 10 commits and 10 hours of works, and so unless you want to go back on all that work, 
+# you have to filter repo the project and remove it from history, this is to have a safe way to do it. And since you can't push due to the big file
+#... then you also need to make a local clones, but it must not use hardlinks. 
+git_clone_nonlocal() {
+    # Ensure we are inside a Git repository
+    if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+        echo "Error: Not inside a Git repository."
+        return 1
+    fi
+
+    # Get the absolute path of the Git repository root
+    repo_path=$(git rev-parse --show-toplevel)
+    repo_name=$(basename "$repo_path")
+
+    # Get the absolute path of the directory above the Git repository
+    clone_parent=$(realpath "$(dirname "$repo_path")")  # Convert to absolute path
+    clone_path="${clone_parent}/${repo_name}_clone"
+
+    # Prevent overwriting if the directory already exists
+    if [[ -d "$clone_path" ]]; then
+        echo "Error: '$clone_path' already exists. Choose a different name or remove it."
+        return 1
+    fi
+
+    # Perform the non-local clone
+    echo "Cloning '$repo_name' to '$clone_path' (non-local clone)..."
+    git clone --no-local "$repo_path" "$clone_path"
+
+    # Verify success
+    if [[ -d "$clone_path/.git" ]]; then
+        echo "Success: Non-local clone created at '$clone_path'."
+    else
+        echo "Error: Cloning failed."
+        return 1
+    fi
+}
+
+alias git_nonlocal_clone="git_clone_nonlocal"
+
+git_filter_remove_dryrun() {
+    if [[ $# -eq 0 ]]; then
+        echo "Usage: git_filter_remove_dryrun [--force] <file-or-directory> [<file2> ...]"
+        return 1
+    fi
+
+    local files_to_check=()
+    local force_mode=false
+
+    # Parse arguments
+    for arg in "$@"; do
+        if [[ "$arg" == "--force" ]]; then
+            force_mode=true
+        else
+            files_to_check+=("$arg")
+        fi
+    done
+
+    echo ""
+    echo "🔍 Dry Run: Checking which files exist in history..."
+    echo ""
+
+    if [[ "$force_mode" == false ]]; then
+        local verified_files=()
+        for file in "${files_to_check[@]}"; do
+            if git log --name-only --pretty=format: | sort -u | grep -qx "$file"; then
+                verified_files+=("$file")
+                echo "✅ File Found: $file"
+                echo "📜 Affected Commits:"
+                git log --oneline --name-only --pretty=format:"%h %s" | grep -B 1 "$file" | awk '!seen[$0]++'
+                echo "--------------------------------------"
+            else
+                echo "❌ Warning: '$file' does not exist in Git history. Exiting to be safe."
+                return 1
+            fi
+        done
+
+        # If no files exist, exit safely
+        if [[ ${#verified_files[@]} -eq 0 ]]; then
+            echo "❌ No valid files found in Git history. Aborting."
+            return 1
+        fi
+    fi
+
+    echo ""
+    echo "🚀 Running `git filter-repo --dry-run` simulation..."
+    echo ""
+
+    if [[ "$force_mode" == true ]]; then
+        git filter-repo --invert-paths --dry-run --force --path "${files_to_check[@]}"
+    else
+        git filter-repo --invert-paths --dry-run --path "${files_to_check[@]}"
+    fi
+    filter_repo_exit_code=$?
+
+    if [[ $filter_repo_exit_code -ne 0 ]]; then
+        printf "\n❌ `git filter-repo --dry-run` failed. Aborting.\n"
+        printf "💡 If the file does not exist in history, there's nothing to remove.\n"
+        printf "💡 This usually happens if you're not in a fresh clone.\n"
+        printf "🔄 Try running: git_clone_nonlocal\n\n"
+        return 1
+    fi
+
+    echo ""
+    echo "✅ Dry run complete. No changes were made."
+}
+
+git_filter_remove() {
+    if [[ $# -eq 0 ]]; then
+        echo "Usage: git_filter_remove [--force] <file-or-directory> [<file2> ...]"
+        return 1
+    fi
+
+    printf "\n Are you in a non-local clone? Use git_clone_nonlocal first, then filter remove there, and push from there.\n\n"
+
+    local files_to_remove=()
+    local force_mode=false
+
+    # Parse arguments
+    for arg in "$@"; do
+        if [[ "$arg" == "--force" ]]; then
+            force_mode=true
+        else
+            files_to_remove+=("$arg")
+        fi
+    done
+
+    if [[ "$force_mode" == false ]]; then
+        # Check if files exist in Git history before attempting removal
+        for file in "${files_to_remove[@]}"; do
+            if git log --name-only --pretty=format: | sort -u | grep -qx "$file"; then
+                echo "✅ File Found: $file"
+            else
+                echo "❌ Warning: '$file' does not exist in Git history. Exiting to be safe."
+                return 1
+            fi
+        done
+    fi
+
+    echo "🚀 The following files will be removed from history:"
+    echo "${files_to_remove[*]}"
+    echo ""
+    echo "⚠️ This will PERMANENTLY rewrite commit history."
+    read "confirm?Are you sure? This will proceed to a dry-run (yes/no): "
+
+    if [[ "$confirm" != "yes" ]]; then
+        echo "❌ Manually Aborted."
+        return 1
+    fi
+
+    # Call the dry-run function first
+    if [[ "$force_mode" == true ]]; then
+        git_filter_remove_dryrun --force "${files_to_remove[@]}" || {
+            printf "\n❌ Aborting due to dry-run failure.\n"
+            return 1
+        }
+    else
+        git_filter_remove_dryrun "${files_to_remove[@]}" || {
+            printf "\n❌ Aborting due to dry-run failure.\n"
+            return 1
+        }
+    fi
+
+    echo ""
+    echo ""
+    echo ""
+    echo "🟡 Warning: This is the last check. If you say yes, it will do permanent removal."
+    read "confirm_dry_run?Does this look like the output of a correct dry-run? (yes/no): "
+    if [[ "$confirm_dry_run" != "yes" ]]; then
+        echo "❌ Manually Aborted."
+        return 1
+    fi
+
+    echo ""
+    echo ""
+    echo ""
+    # Remove files from history using git filter-repo
+    if [[ "$force_mode" == true ]]; then
+        git filter-repo --invert-paths --force --path "${files_to_remove[@]}"
+    else
+        git filter-repo --invert-paths --path "${files_to_remove[@]}"
+    fi
+
+    echo "✅ Successfully removed files from Git history."
+}
+
+
+
+
 
 # ─────────────────────────────────────────────────────
 # 🌎 🔧 1️⃣0️⃣ System Paths & JUnit Setup
@@ -476,7 +675,8 @@ export PATH_TO_FX="$JAVA_PATH/javafx-sdk-23/lib"
 export PATH="$JAVA_HOME/bin:$PATH"
 export PATH="$JAVA_PATH:$PATH"
 
-
+alias jetuml="JetUML"
+alias jetUML="JetUML"
 
 
 # ─────────────────────────────────────────────────────
@@ -503,7 +703,7 @@ alias myip="curl -s https://ipinfo.io/ip"
 
 # Open Neovim config
 alias cn="cd ~/.config/nvim"
-alias cnv="cd ~/.config/nvim && nvim ."
+alias cnv="cd ~/.config/nvim "
 
 
 # Arch Install commands
@@ -536,6 +736,12 @@ alias pwp='cd "$(p)"'
 alias pwv="pwp"
 alias prevc="history --max=1 | c"
 
+copy_history() {
+    local n=${1:-10}  # Default to 10 if no argument is given
+    history | tail -n "$n" | awk '{$1=""; print substr($0,2)}' | c  
+}
+
+
 # Change directory to last visited
 alias back="cd -"
 
@@ -563,14 +769,14 @@ execp() {
 }
 
 # Function to execute a command in the background with logging
-# execpl() {
-#     mkdir -p "$HOME/.config/execp_logs"
-#     log_file="$HOME/.config/execp_logs/${1%% *}.log"
+execpl_nohup() {
+    mkdir -p "$HOME/.config/execp_logs"
+    log_file="$HOME/.config/execp_logs/${1%% *}.log"
 
-#     printf "\n\n--------------------(%s)--------------------\n\n" "$(date)" >> "$log_file"
+    printf "\n\n--------------------(%s)--------------------\n\n" "$(date)" >> "$log_file"
 
-#     nohup "$@" >> "$log_file" 2>&1 &
-# }
+    nohup "$@" >> "$log_file" 2>&1 &
+}
 
 # Function to execute a command in the background using systemd
 execpl_systemd() {
@@ -583,10 +789,14 @@ execpl_systemd() {
 }
 
 # Alias to use systemd-based execution by default
-alias execpls='execpl_systemd'
+alias execpl='execpl_nohup'
 
 
 alias eth="execp thunar ."
+
+
+# -------- Weird stuff V2: Latex Boogaloo
+export CHKTEXRC=/usr/local/etc/chktexrc
 
 
 #---------------------------------------- END OF FILE ---------
