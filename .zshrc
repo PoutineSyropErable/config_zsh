@@ -423,6 +423,21 @@ git_push_all() {
     git_push_all_msg "super push, root git dir and all submodules"
 }
 
+
+git_pull_all() {
+    # Print processing message
+    printf "Processing all submodules...\n"
+    printf "________________________________\n\n"
+
+    # Iterate over submodules and pull updates
+    git submodule foreach --recursive '
+        echo "Updating submodule $name..."
+        git pull origin $(git branch --show-current)
+        printf "________________________________\n\n"
+    '
+}
+
+
 # ─────────────────────────────────────────────────────
 # ⚡ Git Aliases for Quick Commands
 # ─────────────────────────────────────────────────────
@@ -548,14 +563,14 @@ execp() {
 }
 
 # Function to execute a command in the background with logging
-execpl() {
-    mkdir -p "$HOME/.config/execp_logs"
-    log_file="$HOME/.config/execp_logs/${1%% *}.log"
+# execpl() {
+#     mkdir -p "$HOME/.config/execp_logs"
+#     log_file="$HOME/.config/execp_logs/${1%% *}.log"
 
-    printf "\n\n--------------------(%s)--------------------\n\n" "$(date)" >> "$log_file"
+#     printf "\n\n--------------------(%s)--------------------\n\n" "$(date)" >> "$log_file"
 
-    nohup "$@" >> "$log_file" 2>&1 &
-}
+#     nohup "$@" >> "$log_file" 2>&1 &
+# }
 
 # Function to execute a command in the background using systemd
 execpl_systemd() {
@@ -568,9 +583,10 @@ execpl_systemd() {
 }
 
 # Alias to use systemd-based execution by default
-alias execpl='execpl_systemd'
+alias execpls='execpl_systemd'
 
 
+alias eth="execp thunar ."
 
 
 #---------------------------------------- END OF FILE ---------
