@@ -428,6 +428,21 @@ git_push_all() {
     git_push_all_msg "super push, root git dir and all submodules"
 }
 
+
+git_pull_all() {
+    # Print processing message
+    printf "Processing all submodules...\n"
+    printf "________________________________\n\n"
+
+    # Iterate over submodules and pull updates
+    git submodule foreach --recursive '
+        echo "Updating submodule $name..."
+        git pull origin $(git branch --show-current)
+        printf "________________________________\n\n"
+    '
+}
+
+
 # ─────────────────────────────────────────────────────
 # ⚡ Git Aliases for Quick Commands
 # ─────────────────────────────────────────────────────
