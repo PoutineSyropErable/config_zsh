@@ -8,8 +8,8 @@ fi
 # Add this (replace false to true ) in ~/.p10k.zsh 
 # typeset -g POWERLEVEL9K_STATUS_ERROR=true
 
-echo "missing to add local paths (and not just repo path for git filter_remove), though adding it might be a bad idea. Sleep on it and"
-echo "implement it later."
+# echo "missing to add local paths (and not just repo path for git filter_remove), though adding it might be a bad idea. Sleep on it and"
+# echo "implement it later."
 
 # ─────────────────────────────────────────────────────
 # 🛠️ 1️⃣ Zsh & Environment Configuration
