@@ -656,24 +656,28 @@ git_filter_remove() {
 
 
 # ─────────────────────────────────────────────────────
-# 🌎 🔧 1️⃣0️⃣ System Paths & JUnit Setup
+# 🌎 🔧 1️⃣0️⃣ System Paths & Java + JUnit Setup
 # ─────────────────────────────────────────────────────
 
-export PATH="$HOME/bin:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/go/bin:$HOME/Music:$PATH"
+# Custom home binaries, cargo binaries and go binaries
+export PATH="$HOME/bin:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/go/bin:$PATH"
+export PATH="$HOME/Music:$PATH"
 
-export JUNIT5_PATH="/usr/lib/jvm/junit5"
-export JUNIT4_PATH="/usr/lib/jvm/junit4"
+JAVA_PATH="$HOME/.local/java"
+export JAVA_HOME="$JAVA_PATH/java-23-openjdk"
+export PATH_TO_FX="$JAVA_PATH/javafx-sdk-23/lib"
+export PATH="$JAVA_PATH:$PATH"
+export PATH="$JAVA_HOME/bin:$PATH"
+
+
+export JUNIT5_PATH="$JAVA_PATH/junit5"
+export JUNIT4_PATH="$JAVA_PATH/junit4"
 
 export CLASSPATH="$JUNIT5_PATH/junit-jupiter-api-5.11.3.jar:\
 $JUNIT5_PATH/junit-jupiter-engine-5.11.3.jar:\
 $JUNIT5_PATH/junit-jupiter-params-5.11.3.jar:\
 $JUNIT4_PATH/junit-4.13.2.jar"
 
-JAVA_PATH="$HOME/.local/java"
-export JAVA_HOME="$JAVA_PATH/java-23-openjdk"
-export PATH_TO_FX="$JAVA_PATH/javafx-sdk-23/lib"
-export PATH="$JAVA_HOME/bin:$PATH"
-export PATH="$JAVA_PATH:$PATH"
 
 alias jetuml="JetUML"
 alias jetUML="JetUML"
