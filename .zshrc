@@ -133,37 +133,50 @@ fi
 # ─────────────────────────────────────────────────────
 
 # Define the base directory for Python virtual environments (from pip)
-export PYTHON_VENV_DIR="$HOME/MainPython_Virtual_Environment"
+PYTHON_VENV_DIR="$HOME/PythonVenv/"
 
-# Aliases for managing virtual environments
-alias pythonvenv="$PYTHON_VENV_DIR/pip_venv/bin/python" #without activating the venv, using its python to run a file 
-# you can do: "pv file.py" for example
+
+pip_create() {
+    if [[ -z "$1" ]]; then
+        echo "❌ Usage: pip_create <venv_name>"
+        return 1
+    fi
+    VENV_PATH="$PYTHON_VENV_DIR/$1"
+    if [[ -d "$VENV_PATH" ]]; then
+        echo "⚠️ Virtual environment '$1' already exists at $VENV_PATH"
+    else
+        python -m venv "$VENV_PATH"
+        echo "✅ Virtual environment '$1' created at $VENV_PATH"
+    fi
+}
+
+pip_activate() {
+    if [[ -z "$1" ]]; then
+        echo "❌ Usage: pip_activate <venv_name>"
+        return 1
+    fi
+    VENV_PATH="$PYTHON_VENV_DIR/$1"
+    if [[ -d "$VENV_PATH" ]]; then
+        source "$VENV_PATH/bin/activate"
+        echo "✅ Activated virtual environment: $1"
+    else
+        echo "❌ Virtual environment '$1' does not exist in $PYTHON_VENV_DIR"
+    fi
+}
+
+# Use a venv's Python without activating it
+alias pythonvenv="$PYTHON_VENV_DIR/pip_venv/bin/python"
 alias pv="pythonvenv"
 
-# activate and deactivate venvs
-alias govenv="source $PYTHON_VENV_DIR/pip_venv/bin/activate"
-alias projvenv="source $PYTHON_VENV_DIR/project_venv/bin/activate"
+# Activate common virtual environments
+alias govenv="pip_activate pip_venv"
+alias projvenv="pip_activate project_venv"
+
+# Deactivate the current virtual environment
 alias lvenv="deactivate"
 
 
 
-# A premade wrapper: 
-# These don't work with conda so they are kinda useless for you... But it does make some python stuff
-# Easier I guess if you want to use that rather then my venvs example alias
-# Like in further project where you'd rather use pip packages then conda packages
-export WORKON_HOME=$HOME/.virtualenvs
-export VIRTUALENVWRAPPER_PYTHON=$(which python3)
-export VIRTUALENVWRAPPER_VIRTUALENV=$(which virtualenv)
-source $(which virtualenvwrapper.sh)
-
-# Command				What It Does
-# mkvirtualenv myenv	Create a virtual environment named myenv
-# workon myenv			Activate the myenv environment
-# deactivate			Exit the active virtual environment
-# rmvirtualenv myenv	Delete myenv
-# lsvirtualenv			List all virtual environments
-# cdvirtualenv			Go to the active virtual environment's directory
-# cdsitepackages		Navigate to the site-packages directory
 
 conda_activate() {
     local conda_path="$HOME/miniconda3/bin/conda"
@@ -198,6 +211,26 @@ conda_master() {
 
 
 
+#---------------------------------------------------------------------------------------------
+# A premade wrapper: 
+# These don't work with conda so they are kinda useless for you... But it does make some python stuff
+# Easier I guess if you want to use that rather then my venvs example alias
+# Like in further project where you'd rather use pip packages then conda packages
+export WORKON_HOME=$HOME/.virtualenvs
+export VIRTUALENVWRAPPER_PYTHON=$(which python3)
+export VIRTUALENVWRAPPER_VIRTUALENV=$(which virtualenv)
+source $(which virtualenvwrapper.sh)
+
+# Command				What It Does
+# mkvirtualenv myenv	Create a virtual environment named myenv
+# workon myenv			Activate the myenv environment
+# deactivate			Exit the active virtual environment
+# rmvirtualenv myenv	Delete myenv
+# lsvirtualenv			List all virtual environments
+# cdvirtualenv			Go to the active virtual environment's directory
+# cdsitepackages		Navigate to the site-packages directory
+
+
 # ─────────────────────────────────────────────────────
 # 📁 4️⃣ Navigation & Directory Shortcuts
 # ─────────────────────────────────────────────────────
@@ -227,6 +260,7 @@ alias cr="cd ~/.config/rofi"
 alias ctm="cd ~/.config/tmux"
 alias cw="cd ~/.config/waybar"
 alias cz="cd ~/.config/zsh"
+alias cza="cd ~/.config/zathura/"
 
 
 alias cdo="cd ~/Downloads"
@@ -334,6 +368,29 @@ fcc() {
 findc() {
     find . -iname "*$1*"
 }
+
+
+# mix rg with fzf
+fuzzy_find_content() {
+    local max_depth=${1:-3}
+    local query result
+
+    query=$(rg --max-depth "$max_depth" --no-heading --column --line-number . 2>/dev/null | \
+        fzf --ansi --preview 'file=$(echo {} | cut -d: -f1); \
+                              line=$(echo {} | cut -d: -f2); \
+                              bat --color=always --highlight-line $line --line-range $((line-5)):$((line+5)) "$file"')
+
+    [[ -z "$query" ]] && return
+
+    result=$(echo "$query" | awk -F: '{print $1 ":" $2}')
+
+    [[ -n "$result" ]] && ${EDITOR:-nvim} "+$(echo "$result" | cut -d: -f2)" "$(echo "$result" | cut -d: -f1)"
+}
+
+
+
+alias rgfzf="fuzzy_find_content"
+alias fzfrg="fuzzy_find_content"
 
 # ─────────────────────────────────────────────────────
 # 📂 8️⃣ Advanced Directory Search
@@ -462,7 +519,7 @@ alias gpa="git_push_all"
 
 alias gda="git_do_all"
 
-
+alias gas="git ls-files --others --modified --exclude-standard -z | xargs -0 du -h --apparent-size 2>/dev/null | sort -rh | bless"
 
 ##### THE FOLLOWING TWO FUNCTION, git_clone_nonlocal, and git_filter_remove are for securely rewritting the commit history to 
 # remove a file from ever having been inside of it. Useful if you accidentally push your api key like a dumbass, or git add and commit 
@@ -663,26 +720,51 @@ git_filter_remove() {
 export PATH="$HOME/bin:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/go/bin:$PATH"
 export PATH="$HOME/Music:$PATH"
 
-JAVA_PATH="$HOME/.local/java"
-export JAVA_HOME="$JAVA_PATH/java-23-openjdk"
-export PATH_TO_FX="$JAVA_PATH/javafx-sdk-23/lib"
+JAVA_USR_PATH="$HOME/.local/java"
+JAVA_SYS_PATH="/usr/lib/jvm/"
+JAVA_PATH="$JAVA_SYS_PATH"
+
+export JAVA_HOME="$JAVA_PATH/java-21-openjdk"
+export PATH_TO_FX="$JAVA_PATH/javafx-sdk-17/lib"
 export PATH="$JAVA_PATH:$PATH"
 export PATH="$JAVA_HOME/bin:$PATH"
 
 
-export JUNIT5_PATH="$JAVA_PATH/junit5"
-export JUNIT4_PATH="$JAVA_PATH/junit4"
+export JUNIT5_PATH="$JAVA_USR_PATH/junit5"
+export JUNIT4_PATH="$JAVA_USR_PATH/junit4"
 
-export CLASSPATH="$JUNIT5_PATH/junit-jupiter-api-5.11.3.jar:\
-$JUNIT5_PATH/junit-jupiter-engine-5.11.3.jar:\
-$JUNIT5_PATH/junit-jupiter-params-5.11.3.jar:\
-$JUNIT4_PATH/junit-4.13.2.jar"
+# export CLASSPATH="$JUNIT5_PATH/junit-jupiter-api-5.11.3.jar:\
+# $JUNIT5_PATH/junit-jupiter-engine-5.11.3.jar:\
+# $JUNIT5_PATH/junit-jupiter-params-5.11.3.jar:\
+# $JUNIT4_PATH/junit-4.13.2.jar"
 
 
 alias jetuml="JetUML"
 alias jetUML="JetUML"
 
 
+export UNCRUSTIFY_CONFIG="$HOME/uncrustify_default.cfg"
+# For C formatting
+
+
+# Define paths
+AutoMakeJava_Path="${HOME}/Documents/University (Real)/Semester 10/Comp 303/AutomakeJava"
+
+# Path to Python executable inside the virtual environment
+pythonFor_AutoMakeJava="$PYTHON_VENV_DIR/javaAM/bin/python"
+
+
+# Unset alias if it exists (to avoid conflicts)
+unalias automakeJava 2>/dev/null
+
+# Function to run automake.py using the correct Python environment
+automakeJava() {
+	"$pythonFor_AutoMakeJava" "${AutoMakeJava_Path}/mysrc/automake.py" "$@"
+}
+
+
+# Alias to call the function
+alias java_run="automakeJava"
 # ─────────────────────────────────────────────────────
 # 🔧 1️⃣1️⃣ General / Miscellaneous Shortcuts
 # ─────────────────────────────────────────────────────
@@ -709,6 +791,9 @@ alias myip="curl -s https://ipinfo.io/ip"
 alias cn="cd ~/.config/nvim"
 alias cnv="cd ~/.config/nvim "
 
+# For cmd | invert, to reverse the order
+alias invert="tac"
+alias reverse="tac"
 
 # Arch Install commands
 alias sp="sudo pacman -S"
@@ -803,7 +888,7 @@ alias eth="execp thunar ."
 export CHKTEXRC=/usr/local/etc/chktexrc
 
 send_notification() {
-    /home/francois/MainPython_Virtual_Environment/pip_venv/bin/python \
+    $PYTHON_VENV_DIR/pip_venv/bin/python \
     /home/francois/Documents/PhoneNotification/send_notification.py \
     --title="$1" --content="$2"
 }
