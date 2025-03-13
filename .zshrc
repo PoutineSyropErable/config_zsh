@@ -562,6 +562,63 @@ git_clone_nonlocal() {
 
 alias git_nonlocal_clone="git_clone_nonlocal"
 
+rename_files_for_filter_repo() {
+    local files=("$@")
+    local renamed_files=()
+
+    echo ""
+    echo "🔄 Renaming files to prevent accidental removal..."
+
+    for file in "${files[@]}"; do
+        if [[ -e "$file" ]]; then
+            local new_name="${file}_filter_repo_prevent"
+
+            if [[ -e "$new_name" ]]; then
+                echo "❌ Conflict detected: '$new_name' already exists. Aborting."
+                return 1
+            fi
+
+            mv "$file" "$new_name"
+            renamed_files+=("$new_name")
+            echo "✅ Renamed: '$file' → '$new_name'"
+        else
+            echo "⚠️ Warning: '$file' does not exist in the working directory. Proceeding..."
+        fi
+    done
+
+    # Store renamed files for later restoration
+    echo "${renamed_files[@]}" > .filter_repo_renamed_files
+}
+
+restore_files_after_filter_repo() {
+    if [[ ! -f .filter_repo_renamed_files ]]; then
+        echo "❌ No renamed files found. Nothing to restore."
+        return 1
+    fi
+
+    echo ""
+    echo "🔄 Restoring renamed files..."
+
+    local renamed_files=($(cat .filter_repo_renamed_files))
+
+    for renamed_file in "${renamed_files[@]}"; do
+        local original_name="${renamed_file%_filter_repo_prevent}" # Strip `_filter_repo_prevent`
+
+        if [[ -e "$renamed_file" ]]; then
+            mv "$renamed_file" "$original_name"
+            echo "✅ Restored: '$renamed_file' → '$original_name'"
+        else
+            echo "⚠️ Warning: '$renamed_file' not found. Skipping..."
+        fi
+    done
+
+    rm -f .filter_repo_renamed_files  # Cleanup
+}
+
+
+
+
+
 git_filter_remove_dryrun() {
     if [[ $# -eq 0 ]]; then
         echo "Usage: git_filter_remove_dryrun [--force] <file-or-directory> [<file2> ...]"
@@ -610,6 +667,13 @@ git_filter_remove_dryrun() {
     echo "🚀 Running `git filter-repo --dry-run` simulation..."
     echo ""
 
+	# Step 1️⃣: Rename files to avoid accidental removal
+    rename_files_for_filter_repo "${files_to_remove[@]}" || {
+        echo "❌ File renaming failed. Aborting."
+        return 1
+    }
+
+
     if [[ "$force_mode" == true ]]; then
         git filter-repo --invert-paths --dry-run --force --path "${files_to_check[@]}"
     else
@@ -624,6 +688,8 @@ git_filter_remove_dryrun() {
         printf "🔄 Try running: git_clone_nonlocal\n\n"
         return 1
     fi
+
+    restore_files_after_filter_repo
 
     echo ""
     echo "✅ Dry run complete. No changes were made."
@@ -672,6 +738,7 @@ git_filter_remove() {
         return 1
     fi
 
+
     # Call the dry-run function first
     if [[ "$force_mode" == true ]]; then
         git_filter_remove_dryrun --force "${files_to_remove[@]}" || {
@@ -698,12 +765,21 @@ git_filter_remove() {
     echo ""
     echo ""
     echo ""
+
+	# Step 1️⃣: Rename files to avoid accidental removal
+    rename_files_for_filter_repo "${files_to_remove[@]}" || {
+        echo "❌ File renaming failed. Aborting."
+        return 1
+    }
+
     # Remove files from history using git filter-repo
     if [[ "$force_mode" == true ]]; then
         git filter-repo --invert-paths --force --path "${files_to_remove[@]}"
     else
         git filter-repo --invert-paths --path "${files_to_remove[@]}"
     fi
+
+    restore_files_after_filter_repo
 
     echo "✅ Successfully removed files from Git history."
 }
@@ -719,6 +795,7 @@ git_filter_remove() {
 # Custom home binaries, cargo binaries and go binaries
 export PATH="$HOME/bin:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/go/bin:$PATH"
 export PATH="$HOME/Music:$PATH"
+
 
 JAVA_USR_PATH="$HOME/.local/java"
 JAVA_SYS_PATH="/usr/lib/jvm/"
@@ -749,6 +826,7 @@ export UNCRUSTIFY_CONFIG="$HOME/uncrustify_default.cfg"
 
 # Define paths
 AutoMakeJava_Path="${HOME}/Documents/University (Real)/Semester 10/Comp 303/AutomakeJava"
+export PATH="$AutoMakeJava_Path/src:$PATH"
 
 # Path to Python executable inside the virtual environment
 pythonFor_AutoMakeJava="$PYTHON_VENV_DIR/javaAM/bin/python"
