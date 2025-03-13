@@ -805,7 +805,8 @@ export JAVA_HOME="$JAVA_PATH/java-21-openjdk"
 export PATH_TO_FX="$JAVA_PATH/javafx-sdk-21.0.6/lib"
 export PATH="$JAVA_PATH:$PATH"
 export PATH="$JAVA_HOME/bin:$PATH"
-
+export JDTLS_HOME="$HOME/.local/share/eclipse.jdt.ls/bin"
+# export PATH="$JDTLS_HOME:$PATH"
 
 export JUNIT5_PATH="$JAVA_USR_PATH/junit5"
 export JUNIT4_PATH="$JAVA_USR_PATH/junit4"
@@ -818,9 +819,8 @@ $JUNIT5_PATH/junit-jupiter-params-5.11.3.jar:\
 $JUNIT4_PATH/junit-4.13.2.jar"
 
 # Java Tool Options for JavaFX modules
-export JAVA_TOOL_OPTIONS="\
---module-path $PATH_TO_FX \
---add-modules=javafx.base,javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web"
+export JAVAC_TOOL_OPTIONS="--module-path $PATH_TO_FX"
+# --add-modules=javafx.base,javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web"
 
 # With the export classpath, you can now do 
 # javac MyProgram.java -- works without needed extra option
