@@ -798,11 +798,11 @@ export PATH="$HOME/Music:$PATH"
 
 
 JAVA_USR_PATH="$HOME/.local/java"
-JAVA_SYS_PATH="/usr/lib/jvm/"
-JAVA_PATH="$JAVA_SYS_PATH"
+JAVA_SYS_PATH="/usr/lib/jvm"
+JAVA_PATH="$JAVA_USR_PATH"
 
 export JAVA_HOME="$JAVA_PATH/java-21-openjdk"
-export PATH_TO_FX="$JAVA_PATH/javafx-sdk-17/lib"
+export PATH_TO_FX="$JAVA_PATH/javafx-sdk-21.0.6/lib"
 export PATH="$JAVA_PATH:$PATH"
 export PATH="$JAVA_HOME/bin:$PATH"
 
@@ -810,10 +810,21 @@ export PATH="$JAVA_HOME/bin:$PATH"
 export JUNIT5_PATH="$JAVA_USR_PATH/junit5"
 export JUNIT4_PATH="$JAVA_USR_PATH/junit4"
 
-# export CLASSPATH="$JUNIT5_PATH/junit-jupiter-api-5.11.3.jar:\
-# $JUNIT5_PATH/junit-jupiter-engine-5.11.3.jar:\
-# $JUNIT5_PATH/junit-jupiter-params-5.11.3.jar:\
-# $JUNIT4_PATH/junit-4.13.2.jar"
+# Define CLASSPATH for Java compilation & execution
+export CLASSPATH=".:$JAVA_HOME/lib:$PATH_TO_FX:\
+$JUNIT5_PATH/junit-jupiter-api-5.11.3.jar:\
+$JUNIT5_PATH/junit-jupiter-engine-5.11.3.jar:\
+$JUNIT5_PATH/junit-jupiter-params-5.11.3.jar:\
+$JUNIT4_PATH/junit-4.13.2.jar"
+
+# Java Tool Options for JavaFX modules
+export JAVA_TOOL_OPTIONS="\
+--module-path $PATH_TO_FX \
+--add-modules=javafx.base,javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web"
+
+# With the export classpath, you can now do 
+# javac MyProgram.java -- works without needed extra option
+# java MyProgram.java -- works without needed extra options
 
 
 alias jetuml="JetUML"
@@ -837,7 +848,7 @@ unalias automakeJava 2>/dev/null
 
 # Function to run automake.py using the correct Python environment
 automakeJava() {
-	"$pythonFor_AutoMakeJava" "${AutoMakeJava_Path}/mysrc/automake.py" "$@"
+	"$pythonFor_AutoMakeJava" "${AutoMakeJava_Path}/src/automake.py" "$@"
 }
 
 
@@ -893,6 +904,22 @@ alias lsblk1="lsblk -o +PARTLABEL"
 
 # List all open ports
 alias ports="ss -tuln"
+
+checkport() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: checkport <port>"
+        return 1
+    fi
+
+    local port="$1"
+    
+    if ss -tulnp | grep -w ":$port" >/dev/null 2>&1; then
+        ss -tulnp | grep -w ":$port"
+    else
+        echo "❌ No socket found on port $port"
+    fi
+}
+
 
 # Show processes in a tree format
 alias psg="ps auxf"
