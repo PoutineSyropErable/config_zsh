@@ -854,6 +854,7 @@ automakeJava() {
 
 # Alias to call the function
 alias java_run="automakeJava"
+export AM="$AutoMakeJava_Path/src/automake.py"
 # ─────────────────────────────────────────────────────
 # 🔧 1️⃣1️⃣ General / Miscellaneous Shortcuts
 # ─────────────────────────────────────────────────────
@@ -901,6 +902,8 @@ alias disk="df -h"
 
 # See partition with names
 alias lsblk1="lsblk -o +PARTLABEL"
+
+alias fpr="/home/francois/.config/nvim/scripts/find_project_root"
 
 # List all open ports
 alias ports="ss -tuln"
@@ -951,6 +954,17 @@ c_debug() {
     echo "core.%e.%p" | sudo tee /proc/sys/kernel/core_pattern
 }
 # When a C program crash, it will dump the core file in the current dir, so you can use it for gdb
+
+c_debug_stop() {
+    # Reset the core dump file pattern to the default value
+    echo "core" | sudo tee /proc/sys/kernel/core_pattern > /dev/null
+    
+    # Set the core dump size limit back to 0 (disable core dumps)
+    ulimit -c 0
+    
+    echo "Core dump debugging has been disabled."
+}
+
 
 
 # ─────────────────────────────────────────────────────
