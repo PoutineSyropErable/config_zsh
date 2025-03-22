@@ -15,15 +15,13 @@ git clone https://github.com/PoutineSyropErable/config_zsh ~/.config/zsh
 [ -f ~/.zshrc ] && mv --backup=numbered ~/.zshrc ~/.zshrc.bak
 
 
+cd ~/.config/zsh
+chmod 744 ./install_commands.sh
 ./install_commands.sh # If there's an error, we'll have to manually install what fails
 # Create a symbolic link only if the cloned .zshrc exists
 ln -s ~/.config/zsh/.zshrc ~/.zshrc
 
-cd ~/.config/zsh
-
-
 zsh
-chmod 744 ./install_commands.sh
 ```
 
 then copy the commands from install commands.sh
