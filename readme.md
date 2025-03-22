@@ -11,16 +11,14 @@ configuration works well.
 4. lf is a file manager
 5. Neovim is a file editor, with all the ide features
 
-```
-
-https://github.com/PoutineSyropErable/PoutineErable.config
-# ^The parrent, the children vv
-https://github.com/PoutineSyropErable/config_kitty
-https://github.com/PoutineSyropErable/config_tmux
-https://github.com/PoutineSyropErable/config_lf
-https://github.com/PoutineSyropErable/config_nvim
-
-```
+<pre>
+<a href="https://github.com/PoutineSyropErable/config_all">https://github.com/PoutineSyropErable/config_all</a>
+# ^The parent, the children vv
+<a href="https://github.com/PoutineSyropErable/config_kitty">https://github.com/PoutineSyropErable/config_kitty</a>
+<a href="https://github.com/PoutineSyropErable/config_tmux">https://github.com/PoutineSyropErable/config_tmux</a>
+<a href="https://github.com/PoutineSyropErable/config_lf">https://github.com/PoutineSyropErable/config_lf</a>
+<a href="https://github.com/PoutineSyropErable/config_nvim">https://github.com/PoutineSyropErable/config_nvim</a>
+</pre>
 
 ![Example of zsh config Image](zzz_Example.png)
 (The look is from powerlevel-10k, I didn't write it. This is just an install script)

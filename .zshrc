@@ -5,8 +5,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# Add this (replace false to true ) in ~/.p10k.zsh 
-# typeset -g POWERLEVEL9K_STATUS_ERROR=true
+
 
 # echo "missing to add local paths (and not just repo path for git filter_remove), though adding it might be a bad idea. Sleep on it and"
 # echo "implement it later."
@@ -1015,6 +1014,16 @@ send_notification() {
 
 
 
+alias change_prompt_look="p10k configure"
+alias change_look="p10k configure"
+
 #---------------------------------------- END OF FILE ---------
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Add this (replace false to true ) in ~/.p10k.zsh 
+# typeset -g POWERLEVEL9K_STATUS_ERROR=true
+
+# typeset -g POWERLEVEL9K_ALWAYS_SHOW_CONTEXT=true
+typeset -g POWERLEVEL9K_HOST_FOREGROUND=red
+
