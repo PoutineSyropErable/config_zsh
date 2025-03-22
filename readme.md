@@ -18,6 +18,9 @@ git clone https://github.com/PoutineSyropErable/config_zsh ~/.config/zsh
 cd ~/.config/zsh
 chmod 744 ./install_commands.sh
 ./install_commands.sh # If there's an error, we'll have to manually install what fails
+
+# Backup existing ~/.zshrc if it exists, using numbered backups
+[ -f ~/.zshrc ] && mv --backup=numbered ~/.zshrc ~/.zshrc.bak
 # Create a symbolic link only if the cloned .zshrc exists
 ln -s ~/.config/zsh/.zshrc ~/.zshrc
 
