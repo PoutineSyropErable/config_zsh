@@ -89,6 +89,7 @@ if [[ -f ~/.config/lf/lf.zsh ]]; then
     fi
 else
     echo "⚠️ Warning: LF config file not found: ~/.config/lf/lf.zsh"
+	echo "Try doing the ./install_lf"
 fi
 
 
