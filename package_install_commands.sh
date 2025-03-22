@@ -1,20 +1,3 @@
-# Install Oh My Zsh
-RUNZSH=no CHSH=no KEEP_ZSHRC=yes \
-	sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
-#### ---- Commands with ZSH_CUSTOM should probably be runned while zsh is the active shell. But the default is still given
-
-# Install Powerlevel10k
-git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
-	${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-
-# zsh plugins for autosuggestions and syntax highlighting
-git clone https://github.com/zsh-users/zsh-autosuggestions \
-	${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
-	${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-
 # one for virtualvenv, stuff like python and conda
 
 if [ -f /etc/os-release ]; then
