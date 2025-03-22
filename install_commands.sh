@@ -15,7 +15,6 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
 	${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 
 # one for virtualvenv, stuff like python and conda
-pip install virtualenvwrapper
 
 if [ -f /etc/os-release ]; then
 	# Detect Linux distribution

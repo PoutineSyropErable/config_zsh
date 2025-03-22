@@ -21,7 +21,8 @@ chmod 744 ./install_commands.sh
 # Create a symbolic link only if the cloned .zshrc exists
 ln -s ~/.config/zsh/.zshrc ~/.zshrc
 
-zsh
+pip install virtualvenvwrapper
+
 ```
 
 then copy the commands from install commands.sh
