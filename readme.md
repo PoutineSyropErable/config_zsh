@@ -1,5 +1,10 @@
 Here's what it looks like
 
+You might want to checkout the parent:
+https://github.com/PoutineSyropErable/PoutineErable.config,
+For terminal, kitty + tmux + zsh + lf
+configuration works well.
+
 ![Example of zsh config Image](zzz_Example.png)
 
 Also, to install do:
