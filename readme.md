@@ -33,6 +33,7 @@ ln -s ~/.config/zsh/.zshrc ~/.zshrc
 mkdir -p $HOME/PythonVenv                     # New one, for pip venv
 cd ~/PythonVenv
 python3 -m venv "~/PythonVenv/pip_venv/"
+source "~/PythonVenv/pip_venv/bin/activate"
 #btw, if your system is dumb like mac, you should add a softlink so
 # python -> python3
 pip install virtualvenvwrapper
