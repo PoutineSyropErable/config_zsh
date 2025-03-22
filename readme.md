@@ -4,7 +4,7 @@ Here's what it looks like
 
 Also, to install do:
 
-```
+```bash
 # Backup existing ~/.config/zsh if it exists, using numbered backups (~1, ~2, etc.)
 [ -d ~/.config/zsh ] && mv --backup=numbered ~/.config/zsh ~/.config/zsh_backup
 
@@ -14,6 +14,8 @@ git clone https://github.com/PoutineSyropErable/config_zsh ~/.config/zsh
 # Backup existing ~/.zshrc if it exists, using numbered backups
 [ -f ~/.zshrc ] && mv --backup=numbered ~/.zshrc ~/.zshrc.bak
 
+
+./install_commands.sh # If there's an error, we'll have to manually install what fails
 # Create a symbolic link only if the cloned .zshrc exists
 ln -s ~/.config/zsh/.zshrc ~/.zshrc
 
@@ -22,7 +24,6 @@ cd ~/.config/zsh
 
 zsh
 chmod 744 ./install_commands.sh
-./install_commands.sh # If there's an error, we'll have to manually install what fails
 ```
 
 then copy the commands from install commands.sh
