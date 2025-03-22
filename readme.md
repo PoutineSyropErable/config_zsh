@@ -1,11 +1,29 @@
 Here's what it looks like
 
 You might want to checkout the parent:
-https://github.com/PoutineSyropErable/PoutineErable.config,
-For terminal, kitty + tmux + zsh + lf
+For terminal: kitty + tmux + zsh + lf + nvim
 configuration works well.
 
+1. kitty is a terminal
+2. tmux is the multiplexer to make one terminal = Many
+   (Though kitty already has a multiplexer, i dont like it)
+3. zsh is the shell
+4. lf is a file manager
+5. Neovim is a file editor, with all the ide features
+
+```
+
+https://github.com/PoutineSyropErable/PoutineErable.config
+# ^The parrent, the children vv
+https://github.com/PoutineSyropErable/config_kitty
+https://github.com/PoutineSyropErable/config_tmux
+https://github.com/PoutineSyropErable/config_lf
+https://github.com/PoutineSyropErable/config_nvim
+
+```
+
 ![Example of zsh config Image](zzz_Example.png)
+(The look is from powerlevel-10k, I didn't write it. This is just an install script)
 
 Also, to install do:
 
@@ -41,6 +59,11 @@ python3 -m venv "~/PythonVenv/pip_venv/"
 source "~/PythonVenv/pip_venv/bin/activate"
 #btw, if your system is dumb like mac, you should add a softlink so
 # python -> python3
+
+# ----- Optional --------
+./install_lf_config.sh
+# ----- End of Optional -----
+
 pip install virtualenvwrapper
 zsh
 
