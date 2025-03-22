@@ -59,7 +59,7 @@ ln -s ~/.config/zsh/.zshrc ~/.zshrc
 
 #mkdir -p $HOME/MainPython_Virtual_Environment # Old one, for pip venv, deprecated.
 mkdir -p $HOME/PythonVenv                     # New one, for pip venv
-python3 -m venv "~$HOME/PythonVenv/pip_venv/"
+python3 -m venv "$HOME/PythonVenv/pip_venv/"
 source "$HOME/PythonVenv/pip_venv/bin/activate"
 #btw, if your system is dumb like mac, you should add a softlink so
 # python -> python3
