@@ -63,10 +63,11 @@ source "$HOME/PythonVenv/pip_venv/bin/activate"
 # python -> python3
 
 
-pip install virtualenvwrapper
+# To get my look without having to do the configuration of p10k (It's easy to do, I recommend you try it)
 [ -f ~/.p10k.zsh ] && mv --backup=numbered ~/.p10k.zsh ~/.p10k.zsh.bak
 ln -s ~/.config/zsh/.p10k.zsh ~/.p10k.zsh
 
+pip install virtualenvwrapper
 zsh
 
 printf -- "\n\n=====You are done=====\n\n" ; sleep 2
