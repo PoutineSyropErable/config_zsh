@@ -22,7 +22,7 @@ fi
 #On arch: (Use yay or paru if you want lf-sixel-git)
 if [ SYSTEM == "arch" ]; then
 	printf "\n\n--------Installing Arch Linux Packages -------------\n\n"
-	pacman -S --needed \
+	sudo pacman -S --needed \
 		zoxide \
 		atuin \
 		thefuck \
