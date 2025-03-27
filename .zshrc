@@ -263,6 +263,7 @@ alias lsa="lsd -a"
 
 alias ch='cd ~' # just doing "cd" will work by itself but idc
 alias cco="cd ~/.config"
+alias cala="cd ~/.config/alacritty/"
 alias ce="cd ~/.config/eww"
 alias cf="cd ~/.config/fish"
 alias cH="cd ~/.config/hypr"
@@ -990,20 +991,77 @@ c_debug_stop() {
 
 
 show_files() {
-  # If no argument is provided, use the current directory (`.`)
-  dir="${1:-.}"
+  local dir="${1:-.}"
+  local IGNORED_DIRS=(".git" ".nvim-session" "node_modules" "__pycache__")
 
-  # Find all files in the directory
-  find "$dir" -type f -print | while read -r file; do
-    # Check if the file is a text file
+  # Build find exclude arguments
+  local FIND_IGNORE_ARGS=()
+  for ignore in "${IGNORED_DIRS[@]}"; do
+    FIND_IGNORE_ARGS+=( -path "$dir/$ignore" -prune -o )
+  done
+
+  # Find and process files
+  find "$dir" "${FIND_IGNORE_ARGS[@]}" -type f -print 2>/dev/null | while read -r file; do
+    # Check if it's a text file
     if file --mime-type "$file" | grep -q 'text/'; then
       echo -e "\n==> $file <=="
       cat "$file"
     else
       echo -e "\n==> $file (Not a text file, skipped) <=="
     fi
+done
+}
+
+function kill_using_path() {
+  local target="$1"
+  if [[ -z "$target" ]]; then
+    echo "Usage: kill_using_path /path/to/mountpoint"
+    return 1
+  fi
+
+  echo "🔍 Checking processes using: $target"
+  local output
+  output=$(fuser -m "$target" 2>/dev/null)
+
+  if [[ -z "$output" ]]; then
+    echo "✅ No processes are using $target"
+    return 0
+  fi
+
+  echo
+  echo "🔗 Access Mode Legend:"
+  echo "  c - current directory"
+  echo "  e - executable being run"
+  echo "  f - open file"
+  echo "  F - open file for writing"
+  echo "  r - root directory"
+  echo "  m - memory-mapped file or library"
+
+  echo
+  echo "🧠 Found PIDs: $output"
+
+  for pid_flag in ${(z)output}; do
+    local pid="${pid_flag%%[a-zA-Z]}"
+    local flag="${pid_flag:${#pid}}"
+
+    echo
+    echo "🔎 Process $pid is using it as: $flag"
+    ps -p "$pid" -o pid,ppid,user,%cpu,%mem,etime,cmd
+
+    echo
+    read "?❓ Kill process $pid normally? [y/N] " reply
+    if [[ "$reply" =~ ^[Yy]$ ]]; then
+      kill "$pid" && echo "✅ Sent SIGTERM to $pid" || {
+        echo "❌ Normal kill failed."
+        read "?💥 Force kill (SIGKILL -9)? [y/N] " reply2
+        if [[ "$reply2" =~ ^[Yy]$ ]]; then
+          kill -9 "$pid" && echo "✅ Sent SIGKILL to $pid" || echo "❌ Force kill failed."
+        fi
+      }
+    fi
   done
 }
+
 
 
 
