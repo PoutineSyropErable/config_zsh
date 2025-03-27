@@ -80,15 +80,16 @@ and checkout the ~/.zshrc or ~/.config/.zshrc to see what it has
 zview # see in the main config in a pager
 zmod  # edit the main config in neovim
 
-# you can also change all occurance of vim/nvim to $EDITOR
-#and change
+#I have it to
+EDITOR=nvim
+# You can change it to, so it opens it in code rather then nvim
 EDITOR=code
 or
 EDITOR=nano
-#or whatever you use, this way, it will be better for you
-# I can do that later
-
-# Todo: Replace all alias of nvim in alias by $EDITOR
+or
+EDITOR=emacs # or
+or
+# Whatever you use to edit text files
 ```
 
 To change the look, do:
@@ -104,3 +105,5 @@ change_look
 
 Also: check ./install_commands.sh, but don't really execute it. Maybe executing it will work, you'll most likely have to copy and paste
 it's content one line at a time. Like you shouldn't trust stuff you found online
+
+In fact, check every file before you run unless you personally know me
