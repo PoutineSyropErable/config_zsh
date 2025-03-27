@@ -534,6 +534,7 @@ alias gpd="git push origin desktop"
 alias gpl="git push origin laptop"
 alias gpm="git push origin \$(git branch --show-current)"
 alias gpu="git pull origin \$(git branch --show-current)"
+alias gpr="git pull --rebase origin \$(git branch --show-current)"
 alias gpmn="git push origin main"
 
 alias gpam="git_push_all_msg"
