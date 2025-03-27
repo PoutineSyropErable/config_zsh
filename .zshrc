@@ -45,6 +45,12 @@ alias pvim="nvim --startuptime ~/.config/nvim_logs/startup.log"
 
 
 bindkey -s '^F' 'lf\n'
+bindkey -r '^L'
+bindkey '^G' clear-screen
+
+
+
+
 alias slf="sudo -E lf"
 alias svim="sudo -E nvim"
 # fuck nano!
@@ -56,6 +62,8 @@ sudo() {
         command sudo "$@"
     fi
 }
+
+
 
 
 
@@ -977,6 +985,23 @@ c_debug_stop() {
     ulimit -c 0
     
     echo "Core dump debugging has been disabled."
+}
+
+
+show_files() {
+  # If no argument is provided, use the current directory (`.`)
+  dir="${1:-.}"
+
+  # Find all files in the directory
+  find "$dir" -type f -print | while read -r file; do
+    # Check if the file is a text file
+    if file --mime-type "$file" | grep -q 'text/'; then
+      echo -e "\n==> $file <=="
+      cat "$file"
+    else
+      echo -e "\n==> $file (Not a text file, skipped) <=="
+    fi
+  done
 }
 
 

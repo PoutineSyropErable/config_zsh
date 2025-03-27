@@ -64,7 +64,17 @@ source "$HOME/PythonVenv/pip_venv/bin/activate"
 
 
 pip install virtualenvwrapper
+[ -f ~/.p10k.zsh ] && mv --backup=numbered ~/.p10k.zsh ~/.p10k.zsh.bak
+ln -s ~/.config/zsh/.p10k.zsh ~/.p10k.zsh
+
 zsh
+
+printf -- "\n\n=====You are done=====\n\n" ; sleep 2
+
+# to reconfigure powerlevel-10k: (The things which give the look) [ I give you my look]
+p10k configure
+# or my alias
+change_look
 
 ```
 
