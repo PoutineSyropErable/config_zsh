@@ -22,30 +22,42 @@ fi
 #On arch: (Use yay or paru if you want lf-sixel-git)
 if [ SYSTEM == "arch" ]; then
 	printf "\n\n--------Installing Arch Linux Packages -------------\n\n"
-	sudo pacman -S --needed \
-		zoxide \
-		atuin \
-		thefuck \
-		fzf \
-		bat \
-		ripgrep \
-		fd \
-		tmux \
-		lf \
-		lsd \
-		lazygit \
-		neovim \
-		eza \
-		jq \
-		tree \
-		kitty \
-		git \
-		coreutils \
-		curl \
-		wget \
-		xclip \
-		wl-clipboard \
+	PKGS=(
+		zoxide
+		atuin
+		thefuck
+		fzf
+		bat
+		ripgrep
+		fd
+		tmux
+		lf
+		lsd
+		lazygit
+		neovim
+		eza
+		jq
+		tree
+		kitty
+		git
+		coreutils
+		curl
+		wget
+		xclip
+		wl-clipboard
 		neofetch
+	)
+	if command -v yay >/dev/null 2>&1; then
+		echo "Using yay to install packages..."
+		yay -S --needed --noconfirm "${PKGS[@]}"
+	elif command -v paru >/dev/null 2>&1; then
+		echo "Using paru to install packages..."
+		paru -S --needed --noconfirm "${PKGS[@]}"
+	else
+		echo "Falling back to pacman..."
+		sudo pacman -S --needed "${PKGS[@]}"
+	fi
+
 fi
 
 # maybe brew will failed to install some of them, if it does, just remove it untill it can install as much as possible

@@ -6,4 +6,4 @@
 # Clone the lf configuration repository
 git clone https://github.com/PoutineSyropErable/config_lf ~/.config/lf
 
-sudo yay -S --needed ctpv || sudo paru -S --needed ctpv || sudo brew install ctpv || sudo apt install ctpv || echo "Can't install ctpv"
+yay -S --needed ctpv || paru -S --needed ctpv || sudo brew install ctpv || sudo apt install ctpv || echo "Can't install ctpv"
