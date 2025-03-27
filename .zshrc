@@ -295,25 +295,25 @@ alias cs10="cs1"
 #   5️⃣  Config  Files Modification
 # ─────────────────────────────────────────────────────
 
-alias amod="vim ~/.config/awesome/rc.lua"
-alias bmod="vim ~/.bashrc"
-alias cmod="vim ~/.config/conky/show_all/show_all_conf"
-alias fmod="nvim ~/.config/fish/config.fish"
-alias hmod="cd ~/.config/hypr && vim hyprland.conf"
-alias imod="vim ~/.i3rc"
-alias irmod="cd ~/.config/ironbar && vim ~/.config/ironbar/"
-alias kamod="vim ~/.config/kanata/kanata.kbd"
-alias kimod="vim ~/.config/kitty/kitty.conf"
-alias keymod="cd ~/.config/nvim && nvim lua/core/keymaps.lua"
-alias mmod="vim ~/.config/mpd/mpd.conf"
-alias ncmod="vim ~/.ncmpcpp/config"
-alias nmod="cd ~/.config/nvim && nvim ."
-alias pmod="vim ~/.config/polybar.old/config"
-alias smod="vim ~/.config/sway/config"
-alias tmod="nvim ~/.tmux.conf"
-alias vmod="cd ~/.config/nvim && nvim ."
-alias wmod="cd ~/.config/waybar && vim ~/.config/waybar/"
-alias zmod="nvim ~/.zshrc"
+alias amod="$EDITOR ~/.config/awesome/rc.lua"
+alias bmod="$EDITOR ~/.bashrc"
+alias cmod="$EDITOR ~/.config/conky/show_all/show_all_conf"
+alias fmod="$EDITOR ~/.config/fish/config.fish"
+alias hmod="cd ~/.config/hypr && $EDITOR hyprland.conf"
+alias imod="$EDITOR ~/.i3rc"
+alias irmod="cd ~/.config/ironbar && $EDITOR ~/.config/ironbar/"
+alias kamod="$EDITOR ~/.config/kanata/kanata.kbd"
+alias kimod="$EDITOR ~/.config/kitty/kitty.conf"
+alias keymod="cd ~/.config/$EDITOR && $EDITOR lua/core/keymaps.lua"
+alias mmod="$EDITOR ~/.config/mpd/mpd.conf"
+alias ncmod="$EDITOR ~/.ncmpcpp/config"
+alias nmod="cd ~/.config/$EDITOR && $EDITOR ."
+alias pmod="$EDITOR ~/.config/polybar.old/config"
+alias smod="$EDITOR ~/.config/sway/config"
+alias tmod="$EDITOR ~/.tmux.conf"
+alias vmod="cd ~/.config/$EDITOR && $EDITOR ."
+alias wmod="cd ~/.config/waybar && $EDITOR ~/.config/waybar/"
+alias zmod="$EDITOR ~/.zshrc"
 
 alias zview="bless ~/.zshrc"
 
@@ -357,7 +357,7 @@ tswap() {
 # Search a file with fzf, see its preview, and open it in 
 # neovim to edit it
 fzfv() {
-    nvim "$(fzf -m --preview='bat --color=always {} .')"
+    $EDITOR "$(fzf -m --preview='bat --color=always {} .')"
 }
 
 alias fv="fzfv"

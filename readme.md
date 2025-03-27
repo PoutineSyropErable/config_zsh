@@ -23,6 +23,7 @@ configuration works well.
 ![Example of zsh config Image](zzz_Example.png)
 (The look is from powerlevel-10k, I didn't write it. This is just an install script)
 
+**You can also ask chatgpt what this thing does and manually redo the steps using your prefered way**
 Also, to install do:
 
 ```bash
@@ -34,6 +35,7 @@ git clone https://github.com/PoutineSyropErable/config_zsh ~/.config/zsh
 
 # Backup existing ~/.zshrc if it exists, using numbered backups
 [ -f ~/.zshrc ] && mv --backup=numbered ~/.zshrc ~/.zshrc.bak
+#--backup == numbered is not posix complient, so figure it out.
 
 
 cd ~/.config/zsh
@@ -69,8 +71,29 @@ ln -s ~/.config/zsh/.p10k.zsh ~/.p10k.zsh
 
 pip install virtualenvwrapper
 zsh
+```
 
-printf -- "\n\n=====You are done=====\n\n" ; sleep 2
+and checkout the ~/.zshrc or ~/.config/.zshrc to see what it has
+
+```bash
+
+zview # see in the main config in a pager
+zmod  # edit the main config in neovim
+
+# you can also change all occurance of vim/nvim to $EDITOR
+#and change
+EDITOR=code
+or
+EDITOR=nano
+#or whatever you use, this way, it will be better for you
+# I can do that later
+
+# Todo: Replace all alias of nvim in alias by $EDITOR
+```
+
+To change the look, do:
+
+```bash
 
 # to reconfigure powerlevel-10k: (The things which give the look) [ I give you my look]
 p10k configure
@@ -79,7 +102,5 @@ change_look
 
 ```
 
-then copy the commands from install commands.sh
-
-Aka: check ./install_commands.sh, but don't really execute it. Maybe executing it will work, you'll most likely have to copy and paste
-it's content one line at a time.
+Also: check ./install_commands.sh, but don't really execute it. Maybe executing it will work, you'll most likely have to copy and paste
+it's content one line at a time. Like you shouldn't trust stuff you found online
