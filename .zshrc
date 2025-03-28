@@ -138,6 +138,7 @@ fi
 
 hyprland_switch() {
 	fish -c "kmux"
+	# tmux kill-server
 	tmux setenv -g HYPRLAND_INSTANCE_SIGNATURE "$HYPRLAND_INSTANCE_SIGNATURE"
 }
 
@@ -301,7 +302,7 @@ alias bmod="$EDITOR ~/.bashrc"
 alias cmod="$EDITOR ~/.config/conky/show_all/show_all_conf"
 alias fmod="$EDITOR ~/.config/fish/config.fish"
 alias hmod="cd ~/.config/hypr && $EDITOR hyprland.conf"
-alias imod="$EDITOR ~/.i3rc"
+alias imod="$EDITOR $HOME/.config/i3/config"
 alias irmod="cd ~/.config/ironbar && $EDITOR ~/.config/ironbar/"
 alias kamod="$EDITOR ~/.config/kanata/kanata.kbd"
 alias kimod="$EDITOR ~/.config/kitty/kitty.conf"
@@ -1116,8 +1117,6 @@ alias change_prompt_look="p10k configure"
 alias change_look="p10k configure"
 
 #---------------------------------------- END OF FILE ---------
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # Add this (replace false to true ) in ~/.p10k.zsh 
 # typeset -g POWERLEVEL9K_STATUS_ERROR=true
@@ -1125,3 +1124,5 @@ alias change_look="p10k configure"
 # typeset -g POWERLEVEL9K_ALWAYS_SHOW_CONTEXT=true
 typeset -g POWERLEVEL9K_HOST_FOREGROUND=red
 
+# To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
+[[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
