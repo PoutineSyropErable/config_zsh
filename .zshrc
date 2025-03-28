@@ -973,6 +973,8 @@ alias lg="lazygit"
 alias bottom="btm"
 alias timeshift-wayland="sudo -E timeshift-gtk"
 
+alias find_pacman_cycle="$HOME/.config/zsh/pacman_dep_tree/find_cycles.py"
+
 
 c_debug() {
     ulimit -c unlimited
