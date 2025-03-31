@@ -992,6 +992,15 @@ c_debug_stop() {
     echo "Core dump debugging has been disabled."
 }
 
+real_mounts() {
+  {
+    echo -e "Filesystem Type Size Used Avail Use% Mounted_on"
+    df -hT -x tmpfs -x devtmpfs -x squashfs | awk '$1 ~ /^\/dev\//'
+  } | column -t
+}
+
+
+
 
 show_files() {
   local dir="${1:-.}"
