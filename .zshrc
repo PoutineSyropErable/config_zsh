@@ -218,11 +218,10 @@ conda_master() {
     fi
 }
 
-alias conda_create() {
-conda create --name "$1" python=3.12 numpy debugpy GitPython pillow pygame pytest requests tk virtualenvwrapper websocket-client yt-dlp
-
-
-# conda install
+conda_create() {
+	conda_activate
+	conda create --name "$1" python=3.12 numpy debugpy GitPython pillow pygame pytest requests tk virtualenvwrapper websocket-client yt-dlp
+	# conda install
 }
 
 
