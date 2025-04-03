@@ -157,7 +157,9 @@ pip_create() {
         echo "❌ Usage: pip_create <venv_name>"
         return 1
     fi
+	mkdir -p "$PYTHON_VENV_DIR"
     VENV_PATH="$PYTHON_VENV_DIR/$1"
+
     if [[ -d "$VENV_PATH" ]]; then
         echo "⚠️ Virtual environment '$1' already exists at $VENV_PATH"
     else
