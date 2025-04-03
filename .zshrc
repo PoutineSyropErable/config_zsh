@@ -216,6 +216,14 @@ conda_master() {
     fi
 }
 
+alias conda_create() {
+conda create --name "$1" python=3.12 numpy debugpy GitPython pillow pygame pytest requests tk virtualenvwrapper websocket-client yt-dlp
+
+
+# conda install
+}
+
+
 # possibly, you can just straight up do: "conda activate master_venv"
 # but that's only gonna happen if conda_path was exported to path
 # And that might fuck up some system wide install, because it tries to use that version of python
