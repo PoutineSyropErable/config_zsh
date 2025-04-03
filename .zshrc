@@ -523,10 +523,48 @@ git_pull_all() {
     '
 }
 
+function git_pull_remote_branch() {
+  local branch="$1"
+
+  if [[ -z "$branch" ]]; then
+    echo "Usage: git-pull-remote-branch <branch-name>"
+    return 1
+  fi
+
+  # Fetch all branches from origin
+  git fetch origin
+
+  # Check if the branch exists remotely
+  if git ls-remote --exit-code --heads origin "$branch" &>/dev/null; then
+    # Create a local branch tracking the remote branch
+    git checkout -b "$branch" "origin/$branch"
+  else
+    echo "Branch '$branch' does not exist on origin."
+    return 1
+  fi
+}
+
 
 # ─────────────────────────────────────────────────────
 # ⚡ Git Aliases for Quick Commands
 # ─────────────────────────────────────────────────────
+
+
+git4() {
+	# activate git diff view
+	git config --global merge.tool nvimdiff
+	git config --global mergetool.nvimdiff.cmd 'nvim -d $LOCAL $BASE $REMOTE $MERGED -c "wincmd l" -c "wincmd l"'
+	git config --global mergetool.prompt false
+	git config --global mergetool.keepBackup false
+}
+
+gitv() {
+	## Activate git conflict
+	git config --global merge.tool nvimconflict
+	git config --global mergetool.nvimconflict.cmd 'nvim "$MERGED"'
+	git config --global mergetool.prompt false
+
+}
 
 alias ga="git add ."
 alias gcm="gc"
@@ -538,6 +576,10 @@ alias gpm="git push origin \$(git branch --show-current)"
 alias gpu="git pull origin \$(git branch --show-current)"
 alias gpr="git pull --rebase origin \$(git branch --show-current)"
 alias gpmn="git push origin main"
+
+
+alias gpf="git push -u myfork teleport_projectile_images"
+alias gpfu="git pull myfork teleport_projectile_images"          # just pull from that remote/branch
 
 alias gpam="git_push_all_msg"
 alias gpa="git_push_all"
