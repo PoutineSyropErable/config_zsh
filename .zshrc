@@ -1187,6 +1187,48 @@ send_notification() {
 alias change_prompt_look="p10k configure"
 alias change_look="p10k configure"
 
+
+
+
+replace_word() {
+    local word_to_replace="$1"
+    local replace_to="$2"
+    local exception1="${3:-}"
+    local exception2="${4:-}"
+
+    if [[ -z "$word_to_replace" || -z "$replace_to" ]]; then
+        echo "Usage: replace_word <word_to_replace> <replace_to> [exception1] [exception2]"
+        return 1
+    fi
+
+    # Print info
+    echo "Replacing: '$word_to_replace' → '$replace_to'"
+    [[ -n "$exception1" ]] && echo "Excluding: '$exception1'"
+    [[ -n "$exception2" ]] && echo "Excluding: '$exception2'"
+
+    # Use ripgrep to find all files that contain the word
+    local files=($(rg -l --fixed-strings "$word_to_replace"))
+
+    for file in $files; do
+        # Skip binary files (optional)
+        if file "$file" | grep -q 'binary'; then
+            continue
+        fi
+
+        # Perform in-place replacement using perl for precise matching
+        perl -i -pe '
+            my $from = $ARGV[0];
+            my $to = $ARGV[1];
+            my $ex1 = $ARGV[2];
+            my $ex2 = $ARGV[3];
+
+            s/\b$from\b(?!\w)/$to/g if (!defined($ex1) || $_ !~ /\b$ex1\b/) && (!defined($ex2) || $_ !~ /\b$ex2\b/);
+        ' "$word_to_replace" "$replace_to" "$exception1" "$exception2" "$file"
+    done
+
+    echo "Done."
+}
+
 #---------------------------------------- END OF FILE ---------
 
 # Add this (replace false to true ) in ~/.p10k.zsh 
