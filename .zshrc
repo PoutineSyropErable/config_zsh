@@ -576,6 +576,14 @@ gitv() {
 
 }
 
+gitm() {
+	# Configure Meld as the Git mergetool
+	git config --global merge.tool meld
+	git config --global mergetool.meld.cmd 'meld "$LOCAL" "$BASE" "$REMOTE" --output="$MERGED"'
+	git config --global mergetool.prompt false
+	git config --global mergetool.keepBackup false
+}
+
 alias ga="git add ."
 alias gcm="gc"
 alias gdf="git diff --name-only"
