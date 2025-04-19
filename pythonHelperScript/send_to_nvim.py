@@ -7,7 +7,8 @@ import os
 import glob
 from typing import List
 
-from open_remote_nvim import DEFAULT_RSM, FsFilePathStr, FsDirPathStr
+from root_utils import FsFilePathStr, FsDirPathStr
+from open_remote_nvim import DEFAULT_RSM
 
 
 def send_to_nvim(files: List[FsFilePathStr], remote_session_name: str = DEFAULT_RSM):
