@@ -5,21 +5,38 @@ import sys
 import argparse
 import os
 import glob
-from typing import List
+from typing import Callable, List
 from time import sleep
+from queue import Queue
+import re
 
+from send_notification import send_notification
 from root_utils import FsFilePathStr, FsDirPathStr
+from helper import StdPrinter, clean_output
 
 DEFAULT_RSM = "default"  # Default session name
 
 
-def send_to_nvim(files: List[FsFilePathStr], remote_session_name: str = DEFAULT_RSM):
+def send_to_nvim(
+    files: List[FsFilePathStr],
+    remote_session_name: str = DEFAULT_RSM,
+    printNotQueue=True,
+    output_queue: Queue[str] = Queue(),
+):
+
+    def printf(message: str):
+        message = clean_output(message)
+        if printNotQueue:
+            print(message)
+        else:
+            output_queue.put(message)
+
     # Specify the socket location for the Neovim session
     socket = f"/tmp/nvim_session_socket_{remote_session_name}"
 
     # If no files were provided (even after expanding wildcards), print an error
     if not files:
-        print("No valid files provided. Please provide at least one file.", file=sys.stderr)
+        printf("No valid files provided. Please provide at least one file.")
         return 1
 
     real_files = [os.path.realpath(file) for file in files]
@@ -31,11 +48,13 @@ def send_to_nvim(files: List[FsFilePathStr], remote_session_name: str = DEFAULT_
     try:
         for command, file in zip(commands, files):
             # Run the command to open the first file
-            subprocess.run(command)
-            print(f"Sent {file} to Neovim instance at socket: {socket}")
+            result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            printf(f"Sent {file} to Neovim instance at socket: {socket}")
+
+            StdPrinter.print_result(printf, result)
 
     except subprocess.CalledProcessError as e:
-        print(f"Error sending files to Neovim: {e}", file=sys.stderr)
+        printf(f"Error sending files to Neovim: {e}")
         return 1
 
     return 0
