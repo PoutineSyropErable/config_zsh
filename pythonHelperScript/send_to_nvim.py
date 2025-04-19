@@ -6,9 +6,11 @@ import argparse
 import os
 import glob
 from typing import List
+from time import sleep
 
 from root_utils import FsFilePathStr, FsDirPathStr
-from open_remote_nvim import DEFAULT_RSM
+
+DEFAULT_RSM = "default"  # Default session name
 
 
 def send_to_nvim(files: List[FsFilePathStr], remote_session_name: str = DEFAULT_RSM):
@@ -20,17 +22,16 @@ def send_to_nvim(files: List[FsFilePathStr], remote_session_name: str = DEFAULT_
         print("No valid files provided. Please provide at least one file.", file=sys.stderr)
         return 1
 
+    real_files = [os.path.realpath(file) for file in files]
     # Prepare the command to run Neovim
-    command = ["nvim", "--server", socket, "--remote-send", f":e {files[0]}<CR>"]
+    commands = []
+    for real_file in real_files:
+        commands.append(["nvim", "--server", socket, "--remote-send", f":e {real_file}<CR>"])
 
     try:
-        # Run the command to open the first file
-        subprocess.run(command, check=True)
-        print(f"Sent {files[0]} to Neovim instance at socket: {socket}")
-
-        # For additional files, open them one by one
-        for file in files[1:]:
-            subprocess.run(["nvim", "--server", socket, "--remote-send", f":e {file}<CR>"], check=True)
+        for command, file in zip(commands, files):
+            # Run the command to open the first file
+            subprocess.run(command)
             print(f"Sent {file} to Neovim instance at socket: {socket}")
 
     except subprocess.CalledProcessError as e:
