@@ -1264,16 +1264,6 @@ DEFAULT_RSM="default"
 
 
 
-# Function to send a file to an existing Neovim instance
-send_to_nvim() {
-    local file=$1
-    local remote_session_name="${2:-$DEFAULT_RSM}"
-    local socket="/tmp/nvim_session_socket_${remote_session_name}"
-
-    # Send the file to the Neovim instance via remote-send
-    nvim --server "$socket" --remote-send ":e $file<CR>"
-    echo "Sent $file to Neovim instance at socket: $socket"
-}
 
 alias rv="$HOME/.config/zsh/pythonHelperScript/open_remote_nvim.py"
 alias sv="$HOME/.config/zsh/pythonHelperScript/send_to_nvim.py"
