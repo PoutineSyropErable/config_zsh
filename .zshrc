@@ -1262,46 +1262,6 @@ get_project_root() {
 
 DEFAULT_RSM="default"
 
-# Function to open a new Neovim instance with a socket
-open_nvim_old() {
-    # Default session name is "default"
-    local remote_session_name="${DEFAULT_RSM}"
-    local files=()
-
-    # Parse arguments for --name=<session_name> and collect files
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            --name=*)
-                remote_session_name="${1#--name=}"  # Extract session name after --name=
-                shift
-                ;;
-            *)
-                files+=("$1")  # Collect the file arguments
-                shift
-                ;;
-        esac
-    done
-
-    local socket="/tmp/nvim_session_socket_${remote_session_name}"
-
-    # Get the project root from the get_project_root function
-    local project_root=$(get_project_root) || { echo "Couldn't get project root"; return 1; }
-
-    # Set the session directory based on the project root and session name
-    local session_dir="${project_root}/.nvim-session"
-    local session_file="${session_dir}/${remote_session_name}"
-
-    # Start Neovim with the specified socket
-    if [[ ${#files[@]} -gt 0 ]]; then
-        # Notify and start Neovim with the session and multiple files
-        notify-send -u normal -t 1000 "Neovim started with socket: $socket on files: ${files[*]}"
-		nvim --listen "$socket" --cmd "mksession! $session_file" --cmd "let g:session_name='$remote_session_name'" "$file"
-    else
-        # Notify and start Neovim with just the session (no files)
-		nvim --listen "$socket" --cmd "mksession! $session_file" --cmd "let g:session_name='$remote_session_name'"
-        notify-send -u normal -t 1000 "Neovim started with socket: $socket with no files"
-    fi
-}
 
 
 # Function to send a file to an existing Neovim instance
@@ -1315,8 +1275,8 @@ send_to_nvim() {
     echo "Sent $file to Neovim instance at socket: $socket"
 }
 
-alias rv="open_nvim"
-alias sv="send_to_nvim"
+alias rv="$HOME/.config/zsh/pythonHelperScript/open_remote_nvim.py"
+alias sv="$HOME/.config/zsh/pythonHelperScript/send_to_nvim.py"
 
 
 
