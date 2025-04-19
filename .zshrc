@@ -1295,11 +1295,11 @@ open_nvim_old() {
     if [[ ${#files[@]} -gt 0 ]]; then
         # Notify and start Neovim with the session and multiple files
         notify-send -u normal -t 1000 "Neovim started with socket: $socket on files: ${files[*]}"
-        nvim --listen "$socket" --cmd "NvimPossessionLoadOrCreate '$remote_session_name'" "${files[@]}"
+		nvim --listen "$socket" --cmd "mksession! $session_file" --cmd "let g:session_name='$remote_session_name'" "$file"
     else
         # Notify and start Neovim with just the session (no files)
+		nvim --listen "$socket" --cmd "mksession! $session_file" --cmd "let g:session_name='$remote_session_name'"
         notify-send -u normal -t 1000 "Neovim started with socket: $socket with no files"
-        nvim --listen "$socket" --cmd "NvimPossessionLoadOrCreate '$remote_session_name'"
     fi
 }
 
