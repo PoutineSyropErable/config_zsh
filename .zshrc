@@ -1278,6 +1278,13 @@ send_to_nvim() {
 alias rv="$HOME/.config/zsh/pythonHelperScript/open_remote_nvim.py"
 alias sv="$HOME/.config/zsh/pythonHelperScript/send_to_nvim.py"
 
+alias rv1="rv --name=1"
+alias rv2="rv --name=2"
+alias rv3="rv --name=3"
+alias sv1="sv --name=1"
+alias sv2="sv --name=2"
+alias sv3="sv --name=3"
+
 
 
 
