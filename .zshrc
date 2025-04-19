@@ -285,6 +285,7 @@ alias clf="cd ~/.config/lf"
 alias cP="cd ~/.config/polybar.old/"
 alias cr="cd ~/.config/rofi"
 alias ctm="cd ~/.config/tmux"
+alias cuw="cd ~/.config/uwsm"
 alias cw="cd ~/.config/waybar"
 alias cz="cd ~/.config/zsh"
 alias cza="cd ~/.config/zathura/"
@@ -1173,19 +1174,14 @@ alias execpl='execpl_nohup'
 alias eth="execp thunar ."
 
 
-# -------- Weird stuff V2: Latex Boogaloo
-export CHKTEXRC=/usr/local/etc/chktexrc
-
-send_notification() {
-    $PYTHON_VENV_DIR/pip_venv/bin/python \
-    /home/francois/Documents/PhoneNotification/send_notification.py \
-    --title="$1" --content="$2"
-}
 
 
 
 alias change_prompt_look="p10k configure"
 alias change_look="p10k configure"
+
+
+
 
 
 
@@ -1228,6 +1224,100 @@ replace_word() {
 
     echo "Done."
 }
+
+
+#======== Nvim ports commands
+
+# Function to get the current project root using fpr
+get_project_root() {
+    # Run fpr and capture only stdout, stderr will be printed directly to the terminal
+    project_root=$(fpr)
+
+    # Capture the exit status of fpr
+    local fpr_exit_code=$?
+
+    # Handle different exit codes of fpr
+    if [[ $fpr_exit_code -eq 1 ]]; then
+        # fpr failed, default to current working directory (pwd)
+        echo "Can't find project root, fpr defaulted to pwd" >&2  # Print error to stderr
+        project_root=$(pwd)  # Default to current working directory
+    elif [[ $fpr_exit_code -ne 0 ]]; then
+        # fpr returned an invalid exit code (exit 2 or 3), print error message to stderr
+        echo "Error: fpr returned an invalid exit code ($fpr_exit_code), exiting." >&2
+        return 1  # Exit the function early, but don't exit the shell session
+    fi
+
+    # Check if the output is a valid directory
+    if [[ ! -d "$project_root" ]]; then
+        echo "Project root ($project_root) is not a valid directory, exiting." >&2  # Print error to stderr
+        return 1  # Exit the function early, but don't exit the shell session
+    fi
+
+    # Return the project root (stdout)
+    echo "$project_root"  # Return the valid path
+}
+
+
+
+
+DEFAULT_RSM="default"
+
+# Function to open a new Neovim instance with a socket
+open_nvim() {
+    # If no port is provided, set it to "default"
+	local file="$1"
+    local remote_session_name="${2:-$DEFAULT_RSM}"
+    local socket="/tmp/nvim_session_socket_${remote_session_name}"
+
+	# Get the project root from the get_project_root function
+    local project_root=$(get_project_root) || { echo "Couldn't get project root"; return 1; }
+
+    # Set the session directory based on the project root and session name
+    local session_dir="${project_root}/.nvim-session"
+    local session_file="${session_dir}/${remote_session_name}"
+
+
+
+    # Start Neovim with the specified socket
+	if [[ -n "$file" ]]; then
+		notify-send -u normal -t 1000 "Neovim started with socket: $socket on file: {$file}"
+		# nvim --listen "$socket" --cmd "mksession! $session_file" --cmd "let g:session_name='$remote_session_name'" "$file"
+		nvim --listen "$socket" --cmd "NvimPossessionLoadOrCreate '$remote_session_name'" "$file"
+	else
+		notify-send -u normal -t 1000 "Neovim started with socket: $socket with no file"
+		# nvim --listen "$socket" --cmd "mksession! $session_file" --cmd "let g:session_name='$remote_session_name'"
+		nvim --listen "$socket" --cmd "NvimPossessionLoadOrCreate '$remote_session_name'"
+	fi
+
+}
+
+
+# Function to send a file to an existing Neovim instance
+send_to_nvim() {
+    local file=$1
+    local remote_session_name="${2:-$DEFAULT_RSM}"
+    local socket="/tmp/nvim_session_socket_${remote_session_name}"
+
+    # Send the file to the Neovim instance via remote-send
+    nvim --server "$socket" --remote-send ":e $file<CR>"
+    echo "Sent $file to Neovim instance at socket: $socket"
+}
+
+alias rv="open_nvim"
+alias sv="send_to_nvim"
+
+
+
+
+# -------- Weird stuff V2: Latex Boogaloo
+export CHKTEXRC=/usr/local/etc/chktexrc
+
+send_notification() {
+    $PYTHON_VENV_DIR/pip_venv/bin/python \
+    /home/francois/Documents/PhoneNotification/send_notification.py \
+    --title="$1" --content="$2"
+}
+
 
 #---------------------------------------- END OF FILE ---------
 
