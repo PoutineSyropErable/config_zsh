@@ -38,6 +38,16 @@ source $ZSH/oh-my-zsh.sh
 export TERMINAL=kitty
 export EDITOR=nvim
 
+
+# Determine the flag based on the editor
+if [[ "$EDITOR" == "nvim" ]]; then
+    EDITOR_FLAG="--cmd \"autocmd VimEnter * CdHere\""  # Only for nvim
+else
+    EDITOR_FLAG=""  # No flag for other editors
+fi
+
+
+
 alias v="nvim"
 alias vim="nvim"
 alias ovim="/usr/bin/vim"
@@ -317,7 +327,8 @@ alias imod="$EDITOR $HOME/.config/i3/config"
 alias irmod="cd ~/.config/ironbar && $EDITOR ~/.config/ironbar/"
 alias kamod="$EDITOR ~/.config/kanata/kanata.kbd"
 alias kimod="$EDITOR ~/.config/kitty/kitty.conf"
-alias keymod="cd ~/.config/$EDITOR && $EDITOR lua/core/keymaps.lua"
+alias keymod="cd ~/.config/nvim && $EDITOR lua/core/keymaps.lua"
+alias lmod="$EDITOR ~/.config/lf/lfrc"
 alias mmod="$EDITOR ~/.config/mpd/mpd.conf"
 alias ncmod="$EDITOR ~/.ncmpcpp/config"
 alias nmod="cd ~/.config/$EDITOR && $EDITOR ."
@@ -1260,14 +1271,14 @@ get_project_root() {
 
 
 
+
+
+
+
+alias rv="$HOME/.config/nvim/scripts/pythonScripts/open_remote_nvim.py"
+alias sv="$HOME/.config/nvim/scripts/pythonScripts/send_to_nvim.py"
+
 DEFAULT_RSM="default"
-
-
-
-
-alias rv="$HOME/.config/zsh/pythonHelperScript/open_remote_nvim.py"
-alias sv="$HOME/.config/zsh/pythonHelperScript/send_to_nvim.py"
-
 alias rv1="rv --name=1"
 alias rv2="rv --name=2"
 alias rv3="rv --name=3"
