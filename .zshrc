@@ -6,6 +6,12 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 
+export AF_OPENCL_DEFAULT_DEVICE=1
+export PYOPENCL_CTX="0:1"
+export HCC_AMDGPU_TARGET=gfx1031  # Critical for RDNA 2 GPUs
+export CUPY_INSTALL_USE_HIP=1
+export ROCM_HOME=/opt/rocm  # Ensure ROCm path is set
+export PATH=$ROCM_HOME/bin:$PATH  # Ensure hipcc is in PAT
 
 # echo "missing to add local paths (and not just repo path for git filter_remove), though adding it might be a bad idea. Sleep on it and"
 # echo "implement it later."
@@ -24,7 +30,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Plugins
 plugins=(
-	virtualenvwrapper
+	# virtualenvwrapper
     zsh-syntax-highlighting
 	zsh-autosuggestions
 )
@@ -49,6 +55,7 @@ fi
 
 
 alias v="nvim"
+alias vr="nvim -c 'set readonly'"
 alias vim="nvim"
 alias ovim="/usr/bin/vim"
 alias pvim="nvim --startuptime ~/.config/nvim_logs/startup.log"
@@ -275,6 +282,25 @@ source $(which virtualenvwrapper.sh)
 alias cd="z"  # better cd
 alias ls="lsd" # better ls
 alias ols="/usr/bin/ls"
+
+function cdf() {
+	if [[ $# -eq 0 ]]; then
+		echo "Usage: cdf <filepath>"
+		return 1
+	fi
+
+	local target_dir
+	target_dir=$(dirname -- "$1")
+
+	if [[ ! -d "$target_dir" ]]; then
+		echo "Directory does not exist: $target_dir" >&2
+		return 2
+	fi
+
+	cd -- "$target_dir" || return 3
+	echo "Changed to: $target_dir"
+
+} 
 
 alias eva="eza" # another colored version of ls
 alias ll='lsd -al'
