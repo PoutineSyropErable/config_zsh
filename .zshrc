@@ -151,6 +151,41 @@ else
     echo "Warning: Unknown display server or unsupported OS!"
 fi
 
+# Copy image to clipboard (Wayland/X11)
+img2clip() {
+  if [[ $# -eq 0 ]]; then
+    echo "Usage: img2clip <image-path>"
+    return 1
+  fi
+
+  local IMAGE_PATH="$1"
+
+  # Check if file exists
+  if [[ ! -f "$IMAGE_PATH" ]]; then
+    echo "Error: File '$IMAGE_PATH' not found."
+    return 1
+  fi
+
+  # Detect MIME type
+  local MIME_TYPE=$(file --mime-type -b "$IMAGE_PATH" 2>/dev/null)
+
+  # Verify it's an image
+  if [[ ! "$MIME_TYPE" =~ ^image/ ]]; then
+    echo "Error: '$IMAGE_PATH' is not an image (MIME: ${MIME_TYPE:-unknown})."
+    return 1
+  fi
+
+  # Try wl-copy (Wayland) first, fall back to xclip (X11)
+  if command -v wl-copy &>/dev/null; then
+    wl-copy < "$IMAGE_PATH" && echo "✅ Image copied to clipboard (Wayland)."
+  elif command -v xclip &>/dev/null; then
+    xclip -selection clipboard -t "$MIME_TYPE" < "$IMAGE_PATH" && echo "✅ Image copied to clipboard (X11)."
+  else
+    echo "Error: Install 'wl-clipboard' (Wayland) or 'xclip' (X11)."
+    return 1
+  fi
+}
+
 
 
 hyprland_switch() {
@@ -283,24 +318,6 @@ alias cd="z"  # better cd
 alias ls="lsd" # better ls
 alias ols="/usr/bin/ls"
 
-function cdf() {
-	if [[ $# -eq 0 ]]; then
-		echo "Usage: cdf <filepath>"
-		return 1
-	fi
-
-	local target_dir
-	target_dir=$(dirname -- "$1")
-
-	if [[ ! -d "$target_dir" ]]; then
-		echo "Directory does not exist: $target_dir" >&2
-		return 2
-	fi
-
-	cd -- "$target_dir" || return 3
-	echo "Changed to: $target_dir"
-
-} 
 
 alias eva="eza" # another colored version of ls
 alias ll='lsd -al'
@@ -312,7 +329,7 @@ alias ch='cd ~' # just doing "cd" will work by itself but idc
 alias cco="cd ~/.config"
 alias cala="cd ~/.config/alacritty/"
 alias ce="cd ~/.config/eww"
-alias cf="cd ~/.config/fish"
+alias cfi="cd ~/.config/fish"
 alias cH="cd ~/.config/hypr"
 alias cir="cd ~/.config/ironbar"
 alias cka="cd ~/.config/kanata"
@@ -407,6 +424,7 @@ tswap() {
 # neovim to edit it
 fzfv() {
     $EDITOR "$(fzf -m --preview='bat --color=always {} .')"
+
 }
 
 alias fv="fzfv"
@@ -487,6 +505,38 @@ fcdn() {
     local dir
     dir=$(fd -t d --hidden -d "$depth" "$search_term" | fzf)
     [[ -n "$dir" ]] && cd "$dir"
+}
+
+
+
+
+function cdf() {
+	if [[ $# -eq 0 ]]; then
+		echo "Usage: cdf <filepath>"
+		return 1
+	fi
+
+	local target_dir
+	target_dir=$(dirname -- "$1")
+
+	if [[ ! -d "$target_dir" ]]; then
+		echo "Directory does not exist: $target_dir" >&2
+		return 2
+	fi
+
+	cd -- "$target_dir" || return 3
+	echo "Changed to: $target_dir"
+
+} 
+
+function cf() {
+	local file_path
+	file_path=$(fd . --type f --hidden --follow --exclude .git . | fzf --preview='bat --color=always {} .')
+	if [[ -n "$file_path" ]]; then
+		abs_path="$(realpath "$file_path")"      # convert to absolute path
+		cd "$(dirname "$abs_path")"              # cd to directory of absolute path
+		nvim "$abs_path"
+	fi
 }
 
 
@@ -648,6 +698,9 @@ alias gas="git ls-files --others --modified --exclude-standard -z | xargs -0 du 
 # a huge file by doing git add ., and now it's been 10 commits and 10 hours of works, and so unless you want to go back on all that work, 
 # you have to filter repo the project and remove it from history, this is to have a safe way to do it. And since you can't push due to the big file
 #... then you also need to make a local clones, but it must not use hardlinks. 
+
+
+
 git_clone_nonlocal() {
     # Ensure we are inside a Git repository
     if ! git rev-parse --is-inside-work-tree &>/dev/null; then
@@ -681,6 +734,7 @@ git_clone_nonlocal() {
         return 1
     fi
 }
+
 
 alias git_nonlocal_clone="git_clone_nonlocal"
 
@@ -919,6 +973,8 @@ export PATH="$HOME/bin:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/go/bin:$PATH"
 export PATH="$HOME/Music:$PATH"
 
 
+
+
 JAVA_USR_PATH="$HOME/.local/java"
 JAVA_SYS_PATH="/usr/lib/jvm"
 JAVA_PATH="$JAVA_USR_PATH"
@@ -977,6 +1033,19 @@ automakeJava() {
 # Alias to call the function
 alias java_run="automakeJava"
 export AM="$AutoMakeJava_Path/src/automake.py"
+
+
+# ─────────────────────────────────────────────────────
+# 🌎 🔧 1️⃣0️⃣ System Paths (Perl Setup)
+# ─────────────────────────────────────────────────────
+PATH="/home/francois/perl5/bin${PATH:+:${PATH}}"; export PATH;
+PERL5LIB="/home/francois/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
+PERL_LOCAL_LIB_ROOT="/home/francois/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
+PERL_MB_OPT="--install_base \"/home/francois/perl5\""; export PERL_MB_OPT;
+PERL_MM_OPT="INSTALL_BASE=/home/francois/perl5"; export PERL_MM_OPT;
+
+
+
 # ─────────────────────────────────────────────────────
 # 🔧 1️⃣1️⃣ General / Miscellaneous Shortcuts
 # ─────────────────────────────────────────────────────
@@ -1301,6 +1370,7 @@ get_project_root() {
 
 
 alias rv="$HOME/.config/nvim/scripts/pythonScripts/open_remote_nvim.py"
+alias rvmod="rv $HOME/.config/nvim/scripts/pythonScripts/open_remote_nvim.py"
 alias sv="$HOME/.config/nvim/scripts/pythonScripts/send_to_nvim.py"
 
 DEFAULT_RSM="default"
@@ -1334,3 +1404,4 @@ typeset -g POWERLEVEL9K_HOST_FOREGROUND=red
 
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
 [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
+
