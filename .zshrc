@@ -671,7 +671,7 @@ gitm() {
 	git config --global mergetool.keepBackup false
 }
 
-alias ga="git add ."
+alias ga="git add --all"
 alias gcm="gc"
 alias gdf="git diff --name-only"
 
