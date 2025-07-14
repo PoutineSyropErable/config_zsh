@@ -13,6 +13,7 @@ export CUPY_INSTALL_USE_HIP=1
 export ROCM_HOME=/opt/rocm  # Ensure ROCm path is set
 export PATH=$ROCM_HOME/bin:$PATH  # Ensure hipcc is in PAT
 
+
 # echo "missing to add local paths (and not just repo path for git filter_remove), though adding it might be a bad idea. Sleep on it and"
 # echo "implement it later."
 
@@ -276,6 +277,11 @@ conda_create() {
 
 	# conda install
 }
+alias conda_dump="conda env export > environment.yml"
+alias conda_load="conda env create -f environment.yml"
+
+alias pip_dump="pip freeze > requirements.txt"
+alias pip_load="pip install -r requirements.txt"
 
 
 # possibly, you can just straight up do: "conda activate master_venv"
@@ -286,6 +292,8 @@ conda_create() {
 # Keeping the bellow commented out. With it commented out, conda activate master_venv won't work. because 
 # conda is unknown command. With it not commented out, it will work. But see warning paragraph above
 # export PATH="$HOME/miniconda3/bin/conda:$PATH"
+
+
 
 
 
@@ -337,6 +345,7 @@ alias cki="cd ~/.config/kitty"
 alias clf="cd ~/.config/lf"
 alias cP="cd ~/.config/polybar.old/"
 alias cr="cd ~/.config/rofi"
+alias crm="cd ~/.config/rmpc"
 alias ctm="cd ~/.config/tmux"
 alias cuw="cd ~/.config/uwsm"
 alias cw="cd ~/.config/waybar"
@@ -640,6 +649,59 @@ function git_pull_remote_branch() {
     return 1
   fi
 }
+
+git_diff_report() {
+  local good="$1"
+  local bad="$2"
+  local out_file="lazydev_lua_attach_issue.diff"
+
+  if [[ -z "$good" || -z "$bad" ]]; then
+    echo "Usage: git_diff_report <good_commit> <bad_commit>"
+    return 1
+  fi
+
+  git diff "$good" "$bad" > "$out_file"
+  echo "Diff saved to $out_file"
+}
+
+function dirdiff() {
+  # Usage: dirdiff [options] dir1 dir2
+  local color_diff format side_by_side suppress_common show_counts
+  zparseopts -D -E \
+    c=color_diff -color=color_diff \
+    y=side_by_side -side-by-side=side_by_side \
+    u=suppress_common -unique=suppress_common \
+    n=show_counts -count=show_counts
+
+  if [[ $# -ne 2 ]]; then
+    echo "Usage: dirdiff [options] dir1 dir2"
+    echo "Options:"
+    echo "  -c, --color      Colored output"
+    echo "  -y, --side-by-side Parallel comparison"
+    echo "  -u, --unique     Only show unique files"
+    echo "  -n, --count      Show counts of unique files"
+    return 1
+  fi
+
+  local dir1=${1:a} dir2=${2:a}  # Convert to absolute paths
+  local ls_opts=(-1U)  # -1: one per line, -U: don't sort
+
+  # Build diff command
+  local cmd=(diff)
+  [[ -n $side_by_side ]] && cmd+=(-y)
+  [[ -n $suppress_common ]] && cmd+=(--suppress-common-lines)
+  [[ -n $color_diff ]] && cmd=(colordiff "${cmd[@]}")
+
+  # Execute comparison
+  if [[ -n $show_counts ]]; then
+    echo "\n=== Unique files ==="
+    echo "Only in ${dir1:t}: $(comm -23 <(ls $ls_opts $dir1 | sort) <(ls $ls_opts $dir2 | sort) | wc -l)"
+    echo "Only in ${dir2:t}: $(comm -13 <(ls $ls_opts $dir1 | sort) <(ls $ls_opts $dir2 | sort) | wc -l)"
+  else
+    $cmd <(ls $ls_opts $dir1 | sort) <(ls $ls_opts $dir2 | sort)
+  fi
+}
+
 
 
 # ─────────────────────────────────────────────────────
@@ -1392,6 +1454,10 @@ send_notification() {
     /home/francois/Documents/PhoneNotification/send_notification.py \
     --title="$1" --content="$2"
 }
+
+#ignore ctrl + d. so no close
+setopt IGNORE_EOF
+
 
 
 #---------------------------------------- END OF FILE ---------

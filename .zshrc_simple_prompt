@@ -1,0 +1,51 @@
+autoload -Uz vcs_info
+
+# Enable Git info via vcs_info
+zstyle ':vcs_info:*' enable git
+zstyle ':vcs_info:git:*' formats '%F{green}(%b)%f'
+
+# Run before every prompt
+precmd() {
+	vcs_info
+}
+
+setopt PROMPT_SUBST
+
+# RGB escape helper (zsh >= 5.7)
+rgb() {
+	echo "%{\e[38;2;$1;$2;$3m%}"
+}
+
+# Virtualenv detection (only basename)
+virtualenv_info() {
+	[[ -n "$VIRTUAL_ENV" ]] && echo "%F{blue}($(basename "$VIRTUAL_ENV"))%f"
+}
+
+# Compose prompt
+PROMPT='$(virtualenv_info) %{$(rgb 255 255 0)%}%~%f ${vcs_info_msg_0_} %# '
+
+alias zmod="nvim ~/.zshrc"
+alias zmod1="nvim ~/.zshrc1"
+
+PYTHON_VENV_DIR="$HOME/PythonVenv/"
+pip_activate() {
+	if [[ -z "$1" ]]; then
+		echo "❌ Usage: pip_activate <venv_name>"
+		return 1
+	fi
+	VENV_PATH="$PYTHON_VENV_DIR/$1"
+	if [[ -d "$VENV_PATH" ]]; then
+		source "$VENV_PATH/bin/activate"
+		echo "✅ Activated virtual environment: $1"
+	else
+		echo "❌ Virtual environment '$1' does not exist in $PYTHON_VENV_DIR"
+	fi
+}
+
+# Initialize zoxide. You don't need perfect path for cd. You can cd "bunch of keywords" and it will find the dir
+if ! eval "$(zoxide init zsh)"; then
+	echo "⚠️ Warning: Failed to initialize 'zoxide'"
+fi
+
+alias cd="z"
+alias r="source ~/.zshrc"
