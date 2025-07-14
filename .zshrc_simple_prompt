@@ -28,6 +28,9 @@ alias zmod="nvim ~/.zshrc"
 alias zmod1="nvim ~/.zshrc1"
 
 PYTHON_VENV_DIR="$HOME/PythonVenv/"
+
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+
 pip_activate() {
 	if [[ -z "$1" ]]; then
 		echo "❌ Usage: pip_activate <venv_name>"
