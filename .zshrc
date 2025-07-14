@@ -390,6 +390,7 @@ alias tmod="$EDITOR $EDITOR_FLAG ~/.tmux.conf"
 alias bmod="$EDITOR $EDITOR_FLAG ~/.config/nvim"
 alias wmod="$EDITOR $EDITOR_FLAG ~/.config/waybar/"
 alias zmod="$EDITOR $EDITOR_FLAG ~/.zshrc"
+alias zmod1="$EDITOR $EDITOR_FLAG ~/.zshrc1"
 
 alias fview="bat ~/.fishrc"
 alias tview="bat ~/.tmuxrc"
