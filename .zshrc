@@ -1,3 +1,5 @@
+exec_once_file="$HOME/.zprofile"
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -11,8 +13,12 @@ export PYOPENCL_CTX="0:1"
 export HCC_AMDGPU_TARGET=gfx1031  # Critical for RDNA 2 GPUs
 export CUPY_INSTALL_USE_HIP=1
 export ROCM_HOME=/opt/rocm  # Ensure ROCm path is set
-export PATH=$ROCM_HOME/bin:$PATH  # Ensure hipcc is in PAT
 
+
+# ROCm (HIP/AMD toolchain)
+[[ -n "$ROCM_HOME" && -d "$ROCM_HOME/bin" && ":$PATH:" != *":$ROCM_HOME/bin:"* ]] && PATH="$ROCM_HOME/bin:$PATH"
+export PATH # Ensure hipcc is in PAT
+# export PATH=$ROCM_HOME/bin:$PATH   # equivalent
 
 # echo "missing to add local paths (and not just repo path for git filter_remove), though adding it might be a bad idea. Sleep on it and"
 # echo "implement it later."
@@ -45,6 +51,23 @@ source $ZSH/oh-my-zsh.sh
 export TERMINAL=kitty
 export EDITOR=nvim
 
+
+# Determine the flag based on the editor
+if [[ "$EDITOR" == "nvim" ]]; then
+    EDITOR_FLAG="--cmd \"autocmd VimEnter * CdHere\""  # Only for nvim
+else
+    EDITOR_FLAG=""  # No flag for other editors
+fi
+
+
+openrc() {
+    local file=$1
+    if [[ "$EDITOR" == "nvim" ]]; then
+        "$EDITOR" --cmd 'autocmd VimEnter * CdHere' "$file"
+    else
+        "$EDITOR" "$file"
+    fi
+}
 
 # Determine the flag based on the editor
 if [[ "$EDITOR" == "nvim" ]]; then
@@ -202,12 +225,12 @@ hyprland_switch() {
 # ─────────────────────────────────────────────────────
 
 # Define the base directory for Python virtual environments (from pip)
-PYTHON_VENV_DIR="$HOME/PythonVenv/"
+PYTHON_VENV_DIR="$HOME/.pip_venvs/"
 
 
 pip_create() {
     if [[ -z "$1" ]]; then
-        echo "❌ Usage: pip_create <venv_name>"
+        echo "❌ Usage: pip_create <venv_name> <version>"
         return 1
     fi
 	mkdir -p "$PYTHON_VENV_DIR"
@@ -220,6 +243,82 @@ pip_create() {
         echo "✅ Virtual environment '$1' created at $VENV_PATH"
     fi
 }
+
+pip_create_version() {
+  if [[ -z "$1" ]]; then
+        echo "❌ Usage: pip_create <venv_name> [python_version]"
+        return 1
+    fi
+
+    local venv_name="$1"
+	# pass stuff like 3.12 , 3.12.11
+    local requested_version="${2:-system}"  # Default to system Python
+
+    mkdir -p "$PYTHON_VENV_DIR"
+    local VENV_PATH="$PYTHON_VENV_DIR/$venv_name"
+
+    if [[ -d "$VENV_PATH" ]]; then
+        echo "⚠️ Virtual environment '$venv_name' already exists at $VENV_PATH"
+        return 0
+    fi
+
+    if [[ "$requested_version" == "system" ]]; then
+        python_exe="python"
+    else
+        # Check if pyenv is installed
+        if ! command -v pyenv >/dev/null 2>&1; then
+            echo "❌ pyenv is not installed or not in PATH."
+            return 1
+        fi
+
+        # Find all installed versions matching the requested prefix
+        local installed_versions
+        installed_versions=$(pyenv versions --bare | grep "^${requested_version}")
+
+        if [[ -z "$installed_versions" ]]; then
+            echo "🐍 No installed Python versions matching '$requested_version' found. Installing latest available..."
+
+            # Find latest installable version from pyenv install --list
+            local latest_version
+            latest_version=$(pyenv install --list | sed 's/^[[:space:]]*//' | grep "^${requested_version}" | tail -1)
+
+            if [[ -z "$latest_version" ]]; then
+                echo "❌ Could not find any Python versions starting with '$requested_version' to install."
+                return 1
+            fi
+
+            echo "🐍 Installing Python $latest_version via pyenv..."
+            pyenv install "$latest_version" || { echo "❌ Failed to install Python $latest_version"; return 1; }
+            python_exe="$(pyenv root)/versions/$latest_version/bin/python"
+        else
+            # Use the latest installed patch version from the installed versions list
+            local latest_installed_version
+            latest_installed_version=$(echo "$installed_versions" | sort -V | tail -1)
+
+            read -rp "🐍 Python version '$latest_installed_version' matching '$requested_version' is already installed. Continue using it? [Y/n] " confirm
+            confirm=${confirm:-Y}
+            if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+                echo "❎ Aborting virtualenv creation."
+                return 1
+            fi
+
+            python_exe="$(pyenv root)/versions/$latest_installed_version/bin/python"
+        fi
+
+        # Check if python_exe exists and is executable
+        if [[ ! -x "$python_exe" ]]; then
+            echo "❌ Python executable not found at $python_exe"
+            return 1
+        fi
+    fi
+
+    echo "🛠 Creating virtual environment '$venv_name' with Python executable: $python_exe ..."
+    "$python_exe" -m venv "$VENV_PATH" || { echo "❌ Failed to create virtualenv"; return 1; }
+
+    echo "✅ Virtual environment '$venv_name' created at $VENV_PATH"
+}
+
+
 
 pip_activate() {
     if [[ -z "$1" ]]; then
@@ -234,6 +333,52 @@ pip_activate() {
         echo "❌ Virtual environment '$1' does not exist in $PYTHON_VENV_DIR"
     fi
 }
+
+pip_delete() {
+    if [[ -z "$1" ]]; then
+        echo "❌ Usage: pip_delete <venv_name>"
+        return 1
+    fi
+
+    local VENV_PATH="${PYTHON_VENV_DIR%/}/$1"
+
+    # Safety checks
+    if [[ ! -d "$VENV_PATH" ]]; then
+        echo "❌ Virtual environment '$1' does not exist in $PYTHON_VENV_DIR"
+        return 2
+    fi
+
+    case "$VENV_PATH" in
+        "$HOME"/*) ;;  # ok
+        *)
+            echo "❌ Refusing to delete outside HOME directory: $VENV_PATH"
+            return 3
+            ;;
+    esac
+
+	local relpath="${VENV_PATH#"$HOME"/}"
+
+    # Count slashes in relpath separately to avoid masking return values
+    local count_slashes
+    count_slashes=$(echo "$relpath" | awk -F/ '{print NF}')
+
+    if (( count_slashes < 2 )); then
+        echo "❌ Directory depth too shallow to delete safely: $VENV_PATH"
+        echo "   Expected something like $HOME/some_folder/venv_name"
+        return 4
+    fi
+
+    # Prompt for confirmation - read with -r to avoid backslash mangling
+	echo -n "⚠️ Are you sure you want to delete the virtual environment '$1' at ($VENV_PATH)? [y/N] "
+    read -r confirm
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        rm -rf -- "$VENV_PATH"
+        echo "🗑️ Deleted virtual environment: $1"
+    else
+        echo "❎ Deletion cancelled."
+    fi
+}
+
 
 # Use a venv's Python without activating it
 alias pythonvenv="$PYTHON_VENV_DIR/pip_venv/bin/python"
@@ -302,10 +447,13 @@ alias pip_load="pip install -r requirements.txt"
 # These don't work with conda so they are kinda useless for you... But it does make some python stuff
 # Easier I guess if you want to use that rather then my venvs example alias
 # Like in further project where you'd rather use pip packages then conda packages
-export WORKON_HOME=$HOME/.virtualenvs
-export VIRTUALENVWRAPPER_PYTHON=$(which python3)
-export VIRTUALENVWRAPPER_VIRTUALENV=$(which virtualenv)
-source $(which virtualenvwrapper.sh)
+
+if false; then
+	export WORKON_HOME=$HOME/.virtualenvs
+	export VIRTUALENVWRAPPER_PYTHON=$(which python3)
+	export VIRTUALENVWRAPPER_VIRTUALENV=$(which virtualenv)
+	source $(which virtualenvwrapper.sh)
+fi
 
 # Command				What It Does
 # mkvirtualenv myenv	Create a virtual environment named myenv
@@ -339,6 +487,7 @@ alias cala="cd ~/.config/alacritty/"
 alias ce="cd ~/.config/eww"
 alias cfi="cd ~/.config/fish"
 alias cH="cd ~/.config/hypr"
+alias ci3="cd ~/.config/i3"
 alias cir="cd ~/.config/ironbar"
 alias cka="cd ~/.config/kanata"
 alias cki="cd ~/.config/kitty"
@@ -371,7 +520,7 @@ alias cs10="cs1"
 # ─────────────────────────────────────────────────────
 
 alias amod="$EDITOR $EDITOR_FLAG ~/.config/awesome/rc.lua"
-alias bmod="$EDITOR $EDITOR_FLAG ~/.bashrc"
+alias bmod="openrc ~/.bashrc"
 alias cmod="$EDITOR $EDITOR_FLAG ~/.config/conky/show_all/show_all_conf"
 alias fmod="$EDITOR $EDITOR_FLAG ~/.config/fish/config.fish"
 alias hmod="$EDITOR $EDITOR_FLAG ~/.config/hypr/hyprland.conf"
@@ -387,7 +536,6 @@ alias nmod="$EDITOR $EDITOR_FLAG ~/.config/nvim"
 alias pmod="$EDITOR $EDITOR_FLAG ~/.config/polybar.old/config"
 alias smod="$EDITOR $EDITOR_FLAG ~/.config/sway/config"
 alias tmod="$EDITOR $EDITOR_FLAG ~/.tmux.conf"
-alias bmod="$EDITOR $EDITOR_FLAG ~/.config/nvim"
 alias wmod="$EDITOR $EDITOR_FLAG ~/.config/waybar/"
 alias zmod="$EDITOR $EDITOR_FLAG ~/.zshrc"
 alias zmod1="$EDITOR $EDITOR_FLAG ~/.zshrc1"
@@ -425,6 +573,11 @@ tswap() {
 }
 
 
+tret() {
+	# reattach to a lost session i might have accidentally closed by doing a window kill
+	local session_name="$1"
+	tmux attach -t "$session_name"
+}
 
 # ─────────────────────────────────────────────────────
 # 🔎 7️⃣ File Search & Clipboard Commands
@@ -1024,6 +1177,25 @@ git_filter_remove() {
 }
 
 
+git_pull_branch() {
+    local local_branch="$1"
+    local remote_branch="${2:-$local_branch}"
+
+    if [[ -z "$local_branch" ]]; then
+        echo "Usage: git_pull_branch <local-branch> [remote-branch]"
+        return 1
+    fi
+
+	# ====================================
+    # Fetch the latest from origin
+    git fetch origin "$remote_branch" || return 1
+
+    # Create and checkout the local branch tracking the remote
+    git checkout -b "$local_branch" "origin/$remote_branch"
+}
+
+
+
 
 
 
@@ -1032,9 +1204,16 @@ git_filter_remove() {
 # ─────────────────────────────────────────────────────
 
 # Custom home binaries, cargo binaries and go binaries
-export PATH="$HOME/bin:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/go/bin:$PATH"
-export PATH="$HOME/Music:$PATH"
 
+# User-level binaries
+for dir in "$HOME/bin" "$HOME/.local/bin" "$HOME/.cargo/bin" "$HOME/go/bin" "$HOME/Music" ; do
+  [[ -d "$dir" && ":$PATH:" != *":$dir:"* ]] && PATH="$dir:$PATH"
+done
+export PATH
+
+
+
+alias -g see_path='echo $PATH | tr : "\n"'
 
 
 
@@ -1044,10 +1223,19 @@ JAVA_PATH="$JAVA_USR_PATH"
 
 export JAVA_HOME="$JAVA_PATH/java-21-openjdk"
 export PATH_TO_FX="$JAVA_PATH/javafx-sdk-21.0.6/lib"
-export PATH="$JAVA_PATH:$PATH"
-export PATH="$JAVA_HOME/bin:$PATH"
 export JDTLS_HOME="$HOME/.local/share/eclipse.jdt.ls/bin"
+
+
+# Java-related
+[[ -n "$JAVA_PATH" && ":$PATH:" != *":$JAVA_PATH:"* ]] && PATH="$JAVA_PATH:$PATH"
+[[ -n "$JAVA_HOME" && -d "$JAVA_HOME/bin" && ":$PATH:" != *":$JAVA_HOME/bin:"* ]] && PATH="$JAVA_HOME/bin:$PATH"
+export PATH
+
+
+# don't use it 
 # export PATH="$JDTLS_HOME:$PATH"
+
+
 
 export JUNIT5_PATH="$JAVA_USR_PATH/junit5"
 export JUNIT4_PATH="$JAVA_USR_PATH/junit4"
@@ -1078,7 +1266,10 @@ export UNCRUSTIFY_CONFIG="$HOME/uncrustify_default.cfg"
 
 # Define paths
 AutoMakeJava_Path="${HOME}/Documents/University (Real)/Semester 10/Comp 303/AutomakeJava"
-export PATH="$AutoMakeJava_Path/src:$PATH"
+# Automake Java tool
+[[ -n "$AutoMakeJava_Path" && -d "$AutoMakeJava_Path/src" && ":$PATH:" != *":$AutoMakeJava_Path/src:"* ]] && PATH="$AutoMakeJava_Path/src:$PATH"
+# export PATH="$AutoMakeJava_Path/src:$PATH"
+export PATH
 
 # Path to Python executable inside the virtual environment
 pythonFor_AutoMakeJava="$PYTHON_VENV_DIR/javaAM/bin/python"
@@ -1098,15 +1289,51 @@ alias java_run="automakeJava"
 export AM="$AutoMakeJava_Path/src/automake.py"
 
 
+#
+
 # ─────────────────────────────────────────────────────
 # 🌎 🔧 1️⃣0️⃣ System Paths (Perl Setup)
 # ─────────────────────────────────────────────────────
-PATH="/home/francois/perl5/bin${PATH:+:${PATH}}"; export PATH;
-PERL5LIB="/home/francois/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-PERL_LOCAL_LIB_ROOT="/home/francois/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-PERL_MB_OPT="--install_base \"/home/francois/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=/home/francois/perl5"; export PERL_MM_OPT;
 
+
+# Function to prepend to a colon-separated env var if not already present
+prepend_path() {
+  local varname=$1
+  local dir=$2
+  # Get current value of variable indirectly
+  local val
+  val=$(eval echo "\$$varname")
+  case ":$val:" in
+    *":$dir:"*) ;;  # already present, do nothing
+    *)
+      if [ -z "$val" ]; then
+        eval "$varname=\"$dir\""
+      else
+        eval "$varname=\"$dir:$val\""
+      fi
+      ;;
+  esac
+}
+
+# Prepend directories safely
+prepend_path PATH "/home/francois/perl5/bin"
+prepend_path PERL5LIB "/home/francois/perl5/lib/perl5"
+prepend_path PERL_LOCAL_LIB_ROOT "/home/francois/perl5"
+
+export PATH PERL5LIB PERL_LOCAL_LIB_ROOT
+
+# The following two are static strings, just export them
+PERL_MB_OPT="--install_base \"/home/francois/perl5\""
+PERL_MM_OPT="INSTALL_BASE=/home/francois/perl5"
+
+export PERL_MB_OPT PERL_MM_OPT
+
+
+# PATH="/home/francois/perl5/bin${PATH:+:${PATH}}"; export PATH;
+# PERL5LIB="/home/francois/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
+# PERL_LOCAL_LIB_ROOT="/home/francois/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
+# PERL_MB_OPT="--install_base \"/home/francois/perl5\""; export PERL_MB_OPT;
+# PERL_MM_OPT="INSTALL_BASE=/home/francois/perl5"; export PERL_MM_OPT;
 
 
 # ─────────────────────────────────────────────────────
@@ -1460,6 +1687,9 @@ send_notification() {
 setopt IGNORE_EOF
 
 
+alias unfuck_sudo="sudo rm /var/run/faillock"
+alias unfuck_sudo_clean="sudo faillock --user=francois --reset"
+# need to login as recovery
 
 #---------------------------------------- END OF FILE ---------
 
