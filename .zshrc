@@ -1194,6 +1194,8 @@ git_pull_branch() {
     git checkout -b "$local_branch" "origin/$remote_branch"
 }
 
+alias gpb="git_pull_branch"
+
 
 
 
