@@ -1704,57 +1704,19 @@ typeset -g POWERLEVEL9K_HOST_FOREGROUND=red
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
 [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
 
-install_locally() {
-    if [ $# -eq 0 ]; then
-        echo "Usage: install_locally pkg1 pkg2 ..."
-        return 1
+
+function lr {
+    local IFS=$'\t\n'
+    local tempfile="$(mktemp -t tmp.XXXXXX)"
+    local ranger_cmd=(
+        command
+        ranger
+        --cmd="map q chain shell echo %d > "$tempfile"; quitall"
+    )
+    
+    ${ranger_cmd[@]} "$@"
+    if [[ -f "$tempfile" ]] && [[ "$(cat -- "$tempfile")" != "$(echo -n `pwd`)" ]]; then
+        cd -- "$(cat "$tempfile")" || return
     fi
-
-    local tmpdir="$HOME/.local/tmp_rpm_install"
-    mkdir -p "$tmpdir" "$HOME/.local/bin"
-    cd "$tmpdir" || return 1
-
-    echo "Downloading RPMs for: $*"
-    for pkg in "$@"; do
-        dnf download "$pkg" --downloaddir="$tmpdir" || echo "Failed to download $pkg"
-    done
-
-    echo "Extracting RPMs..."
-    for rpm in *.rpm; do
-        rpm2cpio "$rpm" | cpio -idmv
-    done
-
-    local move_all_needed=0
-
-    # check if binaries exist
-    for pkg in "$@"; do
-        if [ ! -f "usr/bin/$pkg" ]; then
-            echo "Binary for '$pkg' not found at expected path: usr/bin/$pkg"
-            move_all_needed=1
-            break
-        fi
-    done
-
-    if [ $move_all_needed -eq 1 ]; then
-        echo "Contents of $tmpdir:"
-        ls -lh "$tmpdir"
-        read -q "REPLY?Move all extracted files from $tmpdir to ~/.local/bin? [y/N]: "
-        echo
-        [[ $REPLY =~ ^[Yy]$ ]] && find usr/bin -type f -exec mv {} "$HOME/.local/bin/" \; && echo "All binaries moved."
-    else
-        # all binaries exist, move individually
-        for pkg in "$@"; do
-            mv "usr/bin/$pkg" "$HOME/.local/bin/" && echo "Moved $pkg"
-        done
-    fi
-
-    # final cleanup
-    read -q "REPLY?Delete temporary directory $tmpdir? [y/N]: "
-    echo
-    [[ $REPLY =~ ^[Yy]$ ]] && rm -rf "$tmpdir" && echo "Deleted $tmpdir" || echo "Temporary files kept in $tmpdir"
-
-    echo
-    echo "Installation complete! Make sure ~/.local/bin is in your PATH:"
-    echo 'export PATH="$HOME/.local/bin:$PATH"'
+    command rm -f -- "$tempfile" 2>/dev/null
 }
-
