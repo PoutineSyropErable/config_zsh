@@ -1707,16 +1707,15 @@ typeset -g POWERLEVEL9K_HOST_FOREGROUND=red
 
 function lr {
     local IFS=$'\t\n'
-    local tempfile="$(mktemp -t tmp.XXXXXX)"
-    local ranger_cmd=(
-        command
-        ranger
-        --cmd="map q chain shell echo %d > "$tempfile"; quitall"
-    )
-    
-    ${ranger_cmd[@]} "$@"
-    if [[ -f "$tempfile" ]] && [[ "$(cat -- "$tempfile")" != "$(echo -n `pwd`)" ]]; then
-        cd -- "$(cat "$tempfile")" || return
+    local tmpfile
+    tmpfile=$(mktemp)
+
+    # Launch ranger and tell it to write the last dir on quit
+    ranger --choosedir="$tmpfile" "$@"
+
+    if [[ -f "$tmpfile" ]] && [[ "$(cat "$tmpfile")" != "$(pwd)" ]]; then
+        cd -- "$(cat "$tmpfile")" || return
     fi
-    command rm -f -- "$tempfile" 2>/dev/null
+
+    rm -f "$tmpfile"
 }
