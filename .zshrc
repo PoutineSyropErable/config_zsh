@@ -720,6 +720,8 @@ unalias gc 2>/dev/null
 unalias ga 2>/dev/null
 unalias gcm 2>/dev/null
 
+alias find_git_submodules="find . -type d -name '.git'"
+
 # Commit with a message
 gc() {
     git commit -m "$1"
@@ -1363,6 +1365,7 @@ alias myip="curl -s https://ipinfo.io/ip"
 # Open Neovim config
 alias cn="cd ~/.config/nvim"
 alias cnv="cd ~/.config/nvim "
+alias cvi="cd ~/.config/vim "
 
 # For cmd | invert, to reverse the order
 alias invert="tac"
@@ -1705,17 +1708,3 @@ typeset -g POWERLEVEL9K_HOST_FOREGROUND=red
 [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
 
 
-function lr {
-    local IFS=$'\t\n'
-    local tmpfile
-    tmpfile=$(mktemp)
-
-    # Launch ranger and tell it to write the last dir on quit
-    ranger --choosedir="$tmpfile" "$@"
-
-    if [[ -f "$tmpfile" ]] && [[ "$(cat "$tmpfile")" != "$(pwd)" ]]; then
-        cd -- "$(cat "$tmpfile")" || return
-    fi
-
-    rm -f "$tmpfile"
-}
