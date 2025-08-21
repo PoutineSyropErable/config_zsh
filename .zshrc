@@ -1698,6 +1698,9 @@ alias unfuck_sudo="sudo rm /var/run/faillock"
 alias unfuck_sudo_clean="sudo faillock --user=francois --reset"
 # need to login as recovery
 
+# ─────────────────────────────────────────────────────
+# 🔢 Line counter
+# ─────────────────────────────────────────────────────
 
 
 function lcount_tree() {
@@ -1713,6 +1716,11 @@ lcount() {
   done < <(find . -type f -not -path '*/.*' -exec wc -l {} + | awk '$2 != "total" {print $1}')
   echo $total
 }
+
+lcount1() { find . -type f -not -path '*/.*' -exec wc -l {} + | awk '$2 != "total" {sum += $1} END {print sum}'; }
+lcount2() { find . -type f -not -path '*/.*' -exec wc -l {} + ; } # the good one to copy paste to another pc
+lcount3() { find . -type f -exec wc -l {} + ; } # also gets hidden files, so .git fucks
+
 
 
 
