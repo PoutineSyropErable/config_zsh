@@ -1701,8 +1701,19 @@ alias unfuck_sudo_clean="sudo faillock --user=francois --reset"
 
 
 function lcount_tree() {
-	python "$HOME/.config/zsh/lcount_tree.py"
+	"$HOME/.config/zsh/lcount_tree.py"
 }
+
+alias count_lines="lcount_tree"
+
+lcount() {
+  local total=0
+  while IFS= read -r lines; do
+    (( total += lines ))
+  done < <(find . -type f -not -path '*/.*' -exec wc -l {} + | awk '$2 != "total" {print $1}')
+  echo $total
+}
+
 
 
 #---------------------------------------- END OF FILE ---------
