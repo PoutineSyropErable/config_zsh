@@ -1709,7 +1709,7 @@ function lcount_tree() {
 
 alias count_lines="lcount_tree"
 
-lcount() {
+lcount_total() {
   local total=0
   while IFS= read -r lines; do
     (( total += lines ))
@@ -1717,10 +1717,13 @@ lcount() {
   echo $total
 }
 
-lcount1() { find . -type f -not -path '*/.*' -exec wc -l {} + | awk '$2 != "total" {sum += $1} END {print sum}'; }
+lcount1() { find . -type f -exec wc -l {} + ; } # also gets hidden files, so .git fucks
 lcount2() { find . -type f -not -path '*/.*' -exec wc -l {} + ; } # the good one to copy paste to another pc
-lcount3() { find . -type f -exec wc -l {} + ; } # also gets hidden files, so .git fucks
+lcount3() { find . -type f -not -path '*/.*' -exec wc -l {} + | awk '$2 != "total" {sum += $1} END {print sum}'; }
+#3 just recalc the total. it's less good
 
+
+alias lcount="lcount2"
 
 
 
