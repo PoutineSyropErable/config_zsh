@@ -536,6 +536,7 @@ alias nmod="$EDITOR $EDITOR_FLAG ~/.config/nvim"
 alias pmod="$EDITOR $EDITOR_FLAG ~/.config/polybar.old/config"
 alias smod="$EDITOR $EDITOR_FLAG ~/.config/sway/config"
 alias tmod="$EDITOR $EDITOR_FLAG ~/.tmux.conf"
+alias vmod="$EDITOR $EDITOR_FLAG ~/.config/vim/.vimrc"
 alias wmod="$EDITOR $EDITOR_FLAG ~/.config/waybar/"
 alias zmod="$EDITOR $EDITOR_FLAG ~/.zshrc"
 alias zmod1="$EDITOR $EDITOR_FLAG ~/.zshrc1"
@@ -1366,6 +1367,7 @@ alias myip="curl -s https://ipinfo.io/ip"
 alias cn="cd ~/.config/nvim"
 alias cnv="cd ~/.config/nvim "
 alias cvi="cd ~/.config/vim "
+alias cV="cd ~/.config/vim "
 
 # For cmd | invert, to reverse the order
 alias invert="tac"
@@ -1695,6 +1697,13 @@ setopt IGNORE_EOF
 alias unfuck_sudo="sudo rm /var/run/faillock"
 alias unfuck_sudo_clean="sudo faillock --user=francois --reset"
 # need to login as recovery
+
+
+
+function lcount_tree() {
+	python "$HOME/.config/zsh/lcount_tree.py"
+}
+
 
 #---------------------------------------- END OF FILE ---------
 
