@@ -1766,9 +1766,7 @@ lcount_type() {
 # alias c23="gcc -std=c23"
                               
                               
-                             1
 #---------------------------- ------------ END OF FILE ---------
-                             1
 # Add this (replace false to  true ) in ~/.p10k.zsh 
 # typeset -g POWERLEVEL9K_STA2TUS_ERROR=true
 
