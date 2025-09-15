@@ -1722,15 +1722,55 @@ lcount2() { find . -type f -not -path '*/.*' -exec wc -l {} + ; } # the good one
 lcount3() { find . -type f -not -path '*/.*' -exec wc -l {} + | awk '$2 != "total" {sum += $1} END {print sum}'; }
 #3 just recalc the total. it's less good
 
+lcount() {
+  find . -type f \
+    -not -path '*/.*' \
+    -not -name '*.pyc' \
+    -not -name '*.png' \
+    -exec wc -l {} +
+}
 
-alias lcount="lcount2"
+
+lcount_type() {
+  if (( $# == 0 )); then
+    echo "Usage: lcount_type ext1 ext2 ..."
+    return 1
+  fi
+
+  local find_args=(.)
+
+  # build -name patterns for each extension
+  local name_args=()
+  for ext in "$@"; do
+    ext="${ext#.}"  # remove leading dot
+    name_args+=(-o -name "*.$ext")
+  done
+  # remove first -o
+  name_args=("${name_args[@]:1}")
+
+  find "${find_args[@]}" -type f \( "${name_args[@]}" \) \
+    -not -path './.git/*' \
+    -not -name '*.pyc' \
+    -not -name '*.png' \
+    -exec wc -l {} +
+}
 
 
-
-#---------------------------------------- END OF FILE ---------
-
-# Add this (replace false to true ) in ~/.p10k.zsh 
-# typeset -g POWERLEVEL9K_STATUS_ERROR=true
+#------- C alias ------------
+# alias c89="gcc -std=c89"
+# alias c90="gcc -std=c90"
+# alias c99="gcc -std=c99"
+# alias c11="gcc -std=c11"
+# alias c17="gcc -std=c17"
+# alias c18="gcc -std=c18"
+# alias c23="gcc -std=c23"
+                              
+                              
+                             1
+#---------------------------- ------------ END OF FILE ---------
+                             1
+# Add this (replace false to  true ) in ~/.p10k.zsh 
+# typeset -g POWERLEVEL9K_STA2TUS_ERROR=true
 
 # typeset -g POWERLEVEL9K_ALWAYS_SHOW_CONTEXT=true
 typeset -g POWERLEVEL9K_HOST_FOREGROUND=red
