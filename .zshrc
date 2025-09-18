@@ -1757,13 +1757,67 @@ lcount_type() {
 
 
 #------- C alias ------------
-# alias c89="gcc -std=c89"
-# alias c90="gcc -std=c90"
-# alias c99="gcc -std=c99"
-# alias c11="gcc -std=c11"
-# alias c17="gcc -std=c17"
-# alias c18="gcc -std=c18"
-# alias c23="gcc -std=c23"
+alias c89="gcc -std=c89"
+alias c90="gcc -std=c90"
+alias c99="gcc -std=c99"
+alias c11="gcc -std=c11"
+alias c17="gcc -std=c17"
+alias c18="gcc -std=c18"
+alias c23="gcc -std=c23"
+
+function partial_compile() {
+	input="$1"
+	output="$2"
+	gcc -S -O0 -masm=intel -fno-asynchronous-unwind-tables \
+    -fno-unwind-tables -fno-exceptions -fno-stack-protector \
+    "$input" -o "$output"
+
+}
+
+
+function c2asm() {
+    if [[ $# -ne 1 ]]; then
+        echo "Usage: c2asm <file.c>"
+        return 1
+    fi
+
+    local src="$1"
+
+    if [[ "$src" != *.c ]]; then
+        echo "Error: input file must have .c extension"
+        return 1
+    fi
+
+    local out="${src%.c}.s"
+
+	partial_compile "$src" "$out"
+
+    echo "Assembly written to $out"
+}
+
+function c2asm2() {
+    if [[ $# -ne 1 ]]; then
+        echo "Usage: c2asm <file.c>"
+        return 1
+    fi
+
+    local src="$1"
+
+    if [[ "$src" != *.c ]]; then
+        echo "Error: input file must have .c extension"
+        return 1
+    fi
+
+    local out="${src%.c}.o"
+    local asm="${src%.c}.asm"
+
+
+
+	gcc -c -O0 "$src" -o "$out"
+	objdump -d -M intel "$out" > "$asm" 
+
+}
+
                               
                               
 #---------------------------- ------------ END OF FILE ---------
