@@ -1558,6 +1558,15 @@ function kill_using_path() {
 
 
 
+# xprop equivalent. Click on a window to know the running application
+function xprop_equiv() {
+	wlprop
+	hyprctl activewindow -j | jq
+	wayland-info
+	# pick one of the three. 
+}
+
+
 
 # ─────────────────────────────────────────────────────
 # 🛠️ Zsh Functions for Background Execution with Logging
