@@ -1791,6 +1791,9 @@ function c2asm() {
     local out="${src%.c}.s"
 
 	partial_compile "$src" "$out"
+	# gcc -S -O0 -masm=intel -fno-asynchronous-unwind-tables \
+ #    -fno-unwind-tables -fno-exceptions -fno-stack-protector \
+ #    "$src" -o "$out"
 
     echo "Assembly written to $out"
 }
@@ -1815,6 +1818,8 @@ function c2asm2() {
 
 	gcc -c -O0 "$src" -o "$out"
 	objdump -d -M intel "$out" > "$asm" 
+	
+	echo "Assembly written to $asm"
 
 }
 
