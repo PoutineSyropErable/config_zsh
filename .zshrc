@@ -551,7 +551,7 @@ alias ncmod="$EDITOR $EDITOR_FLAG ~/.ncmpcpp/config"
 alias nmod="$EDITOR $EDITOR_FLAG ~/.config/nvim"
 alias pmod="$EDITOR $EDITOR_FLAG ~/.config/polybar.old/config"
 alias smod="$EDITOR $EDITOR_FLAG ~/.config/sway/config"
-alias tmod="$EDITOR $EDITOR_FLAG ~/.config/tmux/tmux.conf"
+alias tmod="$EDITOR $EDITOR_FLAG ~/.config/tmux/.tmux.conf"
 alias tcmod="$EDITOR $EDITOR_FLAG ~/.config/tmux-sessionizer/tmux-sessionizer.conf.bash"
 alias tlmod="$EDITOR $EDITOR_FLAG ~/.local/tmux-sessionizer/tmux-sessionizer"
 alias vmod="$EDITOR $EDITOR_FLAG ~/.config/vim/.vimrc"
@@ -1855,12 +1855,20 @@ function c2asm2() {
 
 
 # tmux sessionizer: 
-bindkey -s '^F' "tmux-sessionizer\n"
 bindkey -s '^K' "tmux-sessionizer\n"
 bindkey -s '\eh' "tmux-sessionizer -s 0\n"
 bindkey -s '\et' "tmux-sessionizer -s 1\n"
 bindkey -s '\en' "tmux-sessionizer -s 2\n"
 bindkey -s '\es' "tmux-sessionizer -s 3\n"
+
+alias tms="tmux-sessionizer"
+alias tms0="tmux-sessionizer -s 0"
+alias tms1="tmux-sessionizer -s 1"
+alias tms2="tmux-sessionizer -s 2"
+alias tms3="tmux-sessionizer -s 3"
+# these are for session commands, so it's kinda useles for me right now
+# learn what it is used for
+
 
 #---------------------------- ------------ END OF FILE ---------
 # Add this (replace false to  true ) in ~/.p10k.zsh 
