@@ -496,10 +496,26 @@ alias cP="cd ~/.config/polybar.old/"
 alias cr="cd ~/.config/rofi"
 alias crm="cd ~/.config/rmpc"
 alias ctm="cd ~/.config/tmux"
+alias ctmc="cd ~/.config/tmux-sessionizer"
+alias ctml="cd ~/.local/tmux-sessionizer"
+alias ctc="cd ~/.config/tmux-sessionizer"
+alias ctl="cd ~/.local/tmux-sessionizer"
 alias cuw="cd ~/.config/uwsm"
 alias cw="cd ~/.config/waybar"
 alias cz="cd ~/.config/zsh"
 alias cza="cd ~/.config/zathura/"
+
+# Open Neovim config
+alias cn="cd ~/.config/nvim"
+alias cnv="cd ~/.config/nvim "
+alias cvi="cd ~/.config/vim "
+alias cV="cd ~/.config/vim "
+alias cns="cd ~/.config/nvim/pyrightconfig.json"
+
+
+# next to the xmods (not implemented here. but it is implemented)
+# alias rvmod="rv $HOME/.config/nvim/scripts/pythonScripts/open_remote_nvim.py"
+# alias svmod="rv $HOME/.config/nvim/scripts/pythonScripts/send_to_nvim.py"
 
 
 alias cdo="cd ~/Downloads"
@@ -535,11 +551,18 @@ alias ncmod="$EDITOR $EDITOR_FLAG ~/.ncmpcpp/config"
 alias nmod="$EDITOR $EDITOR_FLAG ~/.config/nvim"
 alias pmod="$EDITOR $EDITOR_FLAG ~/.config/polybar.old/config"
 alias smod="$EDITOR $EDITOR_FLAG ~/.config/sway/config"
-alias tmod="$EDITOR $EDITOR_FLAG ~/.tmux.conf"
+alias tmod="$EDITOR $EDITOR_FLAG ~/.config/tmux/tmux.conf"
+alias tcmod="$EDITOR $EDITOR_FLAG ~/.config/tmux-sessionizer/tmux-sessionizer.conf.bash"
+alias tlmod="$EDITOR $EDITOR_FLAG ~/.local/tmux-sessionizer/tmux-sessionizer"
 alias vmod="$EDITOR $EDITOR_FLAG ~/.config/vim/.vimrc"
 alias wmod="$EDITOR $EDITOR_FLAG ~/.config/waybar/"
 alias zmod="$EDITOR $EDITOR_FLAG ~/.zshrc"
 alias zmod1="$EDITOR $EDITOR_FLAG ~/.zshrc1"
+
+
+
+alias rvmod="rv $HOME/.config/nvim/scripts/pythonScripts/open_remote_nvim.py"
+alias svmod="rv $HOME/.config/nvim/scripts/pythonScripts/send_to_nvim.py"
 
 alias fview="bat ~/.fishrc"
 alias tview="bat ~/.tmuxrc"
@@ -675,6 +698,7 @@ fcdn() {
 
 
 function cdf() {
+	# Cd to the directory of a file path
 	if [[ $# -eq 0 ]]; then
 		echo "Usage: cdf <filepath>"
 		return 1
@@ -1363,11 +1387,6 @@ alias jat="jq . |  bat --language json"
 # Get current public IP
 alias myip="curl -s https://ipinfo.io/ip"
 
-# Open Neovim config
-alias cn="cd ~/.config/nvim"
-alias cnv="cd ~/.config/nvim "
-alias cvi="cd ~/.config/vim "
-alias cV="cd ~/.config/vim "
 
 # For cmd | invert, to reverse the order
 alias invert="tac"
@@ -1666,14 +1685,19 @@ get_project_root() {
 
 
 
+# next to the xmods (not implemented here. but it is implemented)
+# alias rvmod="rv $HOME/.config/nvim/scripts/pythonScripts/open_remote_nvim.py"
+# alias svmod="rv $HOME/.config/nvim/scripts/pythonScripts/send_to_nvim.py"
 alias rv="$HOME/.config/nvim/scripts/pythonScripts/open_remote_nvim.py"
-alias rvmod="rv $HOME/.config/nvim/scripts/pythonScripts/open_remote_nvim.py"
 alias sv="$HOME/.config/nvim/scripts/pythonScripts/send_to_nvim.py"
 
 DEFAULT_RSM="default"
+# alias rv0="rv --name=0"
 alias rv1="rv --name=1"
 alias rv2="rv --name=2"
 alias rv3="rv --name=3"
+
+# alias sv0="sv --name=0"
 alias sv1="sv --name=1"
 alias sv2="sv --name=2"
 alias sv3="sv --name=3"
@@ -1825,6 +1849,19 @@ function c2asm2() {
 
                               
                               
+
+# disable control flow ( stop C-s and C-q to cause bug)
+# stty -ixon
+
+
+# tmux sessionizer: 
+bindkey -s '^F' "tmux-sessionizer\n"
+bindkey -s '^K' "tmux-sessionizer\n"
+bindkey -s '\eh' "tmux-sessionizer -s 0\n"
+bindkey -s '\et' "tmux-sessionizer -s 1\n"
+bindkey -s '\en' "tmux-sessionizer -s 2\n"
+bindkey -s '\es' "tmux-sessionizer -s 3\n"
+
 #---------------------------- ------------ END OF FILE ---------
 # Add this (replace false to  true ) in ~/.p10k.zsh 
 # typeset -g POWERLEVEL9K_STA2TUS_ERROR=true
