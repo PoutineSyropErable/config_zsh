@@ -669,9 +669,10 @@ alias fzfrg="fuzzy_find_content"
 fcd() {
     local search_term="$1"
     local dir
-    dir=$(fd -t d --hidden "$search_term" | fzf)
-    [[ -n "$dir" ]] && cd "$dir"
+    dir=$(fd -t d --hidden --exclude .git "$search_term" | fzf)
+    [[ -n "$dir" ]] && cd "$dir" || return 1 
 }
+
 
 # Find directories with max depth = 1
 fcd1() {
@@ -1808,7 +1809,11 @@ function partial_compile() {
 }
 
 
+
 function c2asm() {
+	# This functions create an .s file. And it's a stripped, but near accesptable assembly file. 
+	# with gas intel syntax. And it has the .section and other header stuff
+	# this is a partial compilation. 
     if [[ $# -ne 1 ]]; then
         echo "Usage: c2asm <file.c>"
         return 1
@@ -1832,6 +1837,9 @@ function c2asm() {
 }
 
 function c2asm2() {
+	# this function create a simple .asm file of just the code. 
+	# it output a gas intel syntax. But it won't have the other section. 
+	# This is an object dump. Not a partial compilation
     if [[ $# -ne 1 ]]; then
         echo "Usage: c2asm <file.c>"
         return 1
@@ -1846,8 +1854,6 @@ function c2asm2() {
 
     local out="${src%.c}.o"
     local asm="${src%.c}.asm"
-
-
 
 	gcc -c -O0 "$src" -o "$out"
 	objdump -d -M intel "$out" > "$asm" 
