@@ -1535,6 +1535,7 @@ function kill_using_path() {
   echo
   echo "🧠 Found PIDs: $output"
 
+  # this is a correct zsh line. But not a correct bash one
   for pid_flag in ${(z)output}; do
     local pid="${pid_flag%%[a-zA-Z]}"
     local flag="${pid_flag:${#pid}}"
@@ -1802,7 +1803,9 @@ alias c23="gcc -std=c23"
 function partial_compile() {
 	input="$1"
 	output="$2"
-	gcc -S -O0 -masm=intel -fno-asynchronous-unwind-tables \
+	local opt="${3:-0}" # second argument, default to 0
+
+	gcc -S "-O$opt" -masm=intel -fno-asynchronous-unwind-tables \
     -fno-unwind-tables -fno-exceptions -fno-stack-protector \
     "$input" -o "$output"
 
@@ -1814,21 +1817,32 @@ function c2asm() {
 	# This functions create an .s file. And it's a stripped, but near accesptable assembly file. 
 	# with gas intel syntax. And it has the .section and other header stuff
 	# this is a partial compilation. 
-    if [[ $# -ne 1 ]]; then
-        echo "Usage: c2asm <file.c>"
-        return 1
-    fi
+	if [[ $# -lt 1 || $# -gt 2 ]]; then
+		echo "Usage: c2asm <file.c> [optimisation level]"
+		return 1
+	fi
+
 
     local src="$1"
+	local opt="${2:-0}" # second argument, default to 0
 
     if [[ "$src" != *.c ]]; then
         echo "Error: input file must have .c extension"
         return 1
     fi
 
-    local out="${src%.c}.s"
+	if [[ ! "$opt" =~ ^[0-3]$ ]]; then
+		echo "Error: invalid value '$opt'. Must be 0, 1, 2, or 3." >&2
+		return 1
+	fi
 
-	partial_compile "$src" "$out"
+
+    local out="${src%.c}_O$opt.s"
+	
+    # If output exists, move it with numbered backup
+    [[ -e "$out" ]] && mv --backup=numbered "$out" "$out.bak"
+
+	partial_compile "$src" "$out" "$opt"
 	# gcc -S -O0 -masm=intel -fno-asynchronous-unwind-tables \
  #    -fno-unwind-tables -fno-exceptions -fno-stack-protector \
  #    "$src" -o "$out"
@@ -1840,22 +1854,33 @@ function c2asm2() {
 	# this function create a simple .asm file of just the code. 
 	# it output a gas intel syntax. But it won't have the other section. 
 	# This is an object dump. Not a partial compilation
-    if [[ $# -ne 1 ]]; then
-        echo "Usage: c2asm <file.c>"
-        return 1
-    fi
+	if [[ $# -lt 1 || $# -gt 2 ]]; then
+		echo "Usage: c2asm <file.c> [optimisation level]"
+		return 1
+	fi
+
 
     local src="$1"
+	local opt="${2:-0}" # second argument, default to 0
 
     if [[ "$src" != *.c ]]; then
         echo "Error: input file must have .c extension"
         return 1
     fi
 
-    local out="${src%.c}.o"
-    local asm="${src%.c}.asm"
 
-	gcc -c -O0 "$src" -o "$out"
+	if [[ ! "$opt" =~ ^[0-3]$ ]]; then
+		echo "Error: invalid value '$opt'. Must be 0, 1, 2, or 3." >&2
+		return 1
+	fi
+
+    local out="${src%.c}.o"
+    local asm="${src%.c}_O$opt.asm"
+
+	# Numbered backup if assembly file exists
+    [[ -e "$asm" ]] && mv --backup=numbered "$asm" "$asm.bak"
+
+	gcc -c "-O$opt" "$src" -o "$out"
 	objdump -d -M intel "$out" > "$asm" 
 	
 	echo "Assembly written to $asm"
