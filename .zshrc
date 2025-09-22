@@ -1459,13 +1459,13 @@ alias timeshift-wayland="sudo -E timeshift-gtk"
 alias find_pacman_cycle="$HOME/.config/zsh/pacman_dep_tree/find_cycles.py"
 
 
-c_debug() {
-    ulimit -c unlimited
+c_debug_system_wide() {
+    ulimit -c unlimited # This is all I need for the shell
     echo "core.%e.%p" | sudo tee /proc/sys/kernel/core_pattern
 }
 # When a C program crash, it will dump the core file in the current dir, so you can use it for gdb
 
-c_debug_stop() {
+c_debug_system_wide_stop() {
     # Reset the core dump file pattern to the default value
     echo "core" | sudo tee /proc/sys/kernel/core_pattern > /dev/null
     
@@ -1473,6 +1473,15 @@ c_debug_stop() {
     ulimit -c 0
     
     echo "Core dump debugging has been disabled."
+}
+
+function c_debug() {
+	ulimit -c unlimited
+}
+
+
+function c_debug_stop() {
+    ulimit -c 0
 }
 
 real_mounts() {
