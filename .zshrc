@@ -1462,12 +1462,19 @@ alias find_pacman_cycle="$HOME/.config/zsh/pacman_dep_tree/find_cycles.py"
 c_debug_system_wide() {
     ulimit -c unlimited # This is all I need for the shell
     echo "core.%e.%p" | sudo tee /proc/sys/kernel/core_pattern
+	# These change, (same for c_debug_stop) are only runtime changes. 
+	# it won't survive a reboot
 }
 # When a C program crash, it will dump the core file in the current dir, so you can use it for gdb
 
 c_debug_system_wide_stop() {
     # Reset the core dump file pattern to the default value
-    echo "core" | sudo tee /proc/sys/kernel/core_pattern > /dev/null
+    # echo "core" | sudo tee /proc/sys/kernel/core_pattern > /dev/null
+	# ^ Even if this is the wrong default value, it won't survive 
+	# a reboot. so its fine. Though v is the correct value
+	echo '|/usr/lib/systemd/systemd-coredump %P %u %g %s %t %c %h %d %F' | sudo tee /proc/sys/kernel/core_pattern
+
+
     
     # Set the core dump size limit back to 0 (disable core dumps)
     ulimit -c 0
@@ -1475,14 +1482,32 @@ c_debug_system_wide_stop() {
     echo "Core dump debugging has been disabled."
 }
 
-function c_debug() {
-	ulimit -c unlimited
+# Enable core dumps for this shell and write them in the current directory
+c_debug() {
+    ulimit -c unlimited
+    export CORE_PATTERN="./core.%e.%p"
+    echo "Core dumps enabled for this shell. Cores will be written in: $PWD"
+
+	# You can also do this: 
+	# CORE_PATTERN=./core ./a.out
+}
+
+# Run a program with a temporary core pattern
+c_run_with_core() {
+    # Usage: c_run_with_core ./my_program args...
+    CORE_PATTERN="./core.%e.%p" "$@"
+	# If you don't care about overwriting old cores. Just do: 
+	# CORE_PATTERN="./core" "$@"
 }
 
 
-function c_debug_stop() {
+# Disable core dumps for this shell
+c_debug_stop() {
     ulimit -c 0
+    unset CORE_PATTERN
+    echo "Core dumps disabled for this shell."
 }
+
 
 real_mounts() {
   {
