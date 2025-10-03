@@ -228,7 +228,7 @@ hyprland_switch() {
 PYTHON_VENV_DIR="$HOME/.pip_venvs/"
 
 
-pip_create() {
+function pip_create() {
     if [[ -z "$1" ]]; then
         echo "❌ Usage: pip_create <venv_name> <version>"
         return 1
@@ -244,7 +244,7 @@ pip_create() {
     fi
 }
 
-pip_create_version() {
+function pip_create_version() {
   if [[ -z "$1" ]]; then
         echo "❌ Usage: pip_create <venv_name> [python_version]"
         return 1
@@ -320,7 +320,7 @@ pip_create_version() {
 
 
 
-pip_activate() {
+function pip_activate() {
     if [[ -z "$1" ]]; then
         echo "❌ Usage: pip_activate <venv_name>"
         return 1
@@ -334,7 +334,7 @@ pip_activate() {
     fi
 }
 
-pip_delete() {
+function pip_delete() {
     if [[ -z "$1" ]]; then
         echo "❌ Usage: pip_delete <venv_name>"
         return 1
@@ -378,6 +378,18 @@ pip_delete() {
         echo "❎ Deletion cancelled."
     fi
 }
+
+# List all virtual environments
+function pip_list() {
+    if [[ ! -d "$PYTHON_VENV_DIR" ]]; then
+        echo "❌ Directory $PYTHON_VENV_DIR does not exist"
+        return 1
+    fi
+
+    echo "📦 Virtual environments in $PYTHON_VENV_DIR:"
+    find "$PYTHON_VENV_DIR" -mindepth 1 -maxdepth 1 -type d -printf " - %f\n"
+}
+
 
 
 # Use a venv's Python without activating it
@@ -627,6 +639,10 @@ fzfc() {
 
 # copy a file text content to clipboard
 fcc() {
+    if [[ $# -lt 1 ]]; then
+        echo "Usage: fcc <file> <<args>>"
+        return 1
+    fi
     cat "$@" | c
 }
 
@@ -732,10 +748,22 @@ function cf() {
 alias ff="$HOME/.local/bin/fzf_filemanager"
 
 function symcd() {
-  cd "$(dirname "$(readlink -f "$1")")"
+  cd "$(dirname "$(readlink -f "$1")")" || return 1
 }
 
 alias cdsym="symcd"
+
+
+function cdn () {
+	# Zoxide cd to the nth highest score version. 
+    cd "$(zoxide query -i "$@")" || return
+}
+
+alias cdm="cdn"
+
+
+
+
 
 # ─────────────────────────────────────────────────────
 # 🛠️ 9️⃣ Git Functions & Aliases
