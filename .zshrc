@@ -498,6 +498,7 @@ alias cco="cd ~/.config"
 alias cala="cd ~/.config/alacritty/"
 alias ce="cd ~/.config/eww"
 alias cfi="cd ~/.config/fish"
+alias cg="cd ~/.config/gdb"
 alias cH="cd ~/.config/hypr"
 alias ci3="cd ~/.config/i3"
 alias cir="cd ~/.config/ironbar"
@@ -551,6 +552,8 @@ alias amod="$EDITOR $EDITOR_FLAG ~/.config/awesome/rc.lua"
 alias bmod="openrc ~/.bashrc"
 alias cmod="$EDITOR $EDITOR_FLAG ~/.config/conky/show_all/show_all_conf"
 alias fmod="$EDITOR $EDITOR_FLAG ~/.config/fish/config.fish"
+alias gmod="cd ~/.config/gdb && $EDITOR ~/.config/gdb/.gdbinit"
+alias gdbmod="cd ~/.config/gdb && $EDITOR ~/.config/gdb/.gdbinit"
 alias hmod="$EDITOR $EDITOR_FLAG ~/.config/hypr/hyprland.conf"
 alias imod="$EDITOR $EDITOR_FLAG $HOME/.config/i3/config"
 alias irmod="$EDITOR $EDITOR_FLAG ~/.config/ironbar/"
@@ -1629,6 +1632,31 @@ function xprop_equiv() {
 	wayland-info
 	# pick one of the three. 
 }
+
+
+# Change wallpaper on Hyprland via Hyprpaper
+function set_wallpaper() {
+	local file="$1"
+    local monitor="$2"
+
+    if [[ -z "$file" || -z "$monitor" ]]; then
+        echo "Usage: set_wallpaper <file_path> <monitor_id>"
+        return 1
+    fi
+
+    # Resolve full absolute path
+    local fullpath
+    fullpath="$(realpath "$file")"
+
+    if [[ ! -f "$fullpath" ]]; then
+        echo "Error: file '$fullpath' does not exist."
+        return 1
+    fi
+
+    # Set wallpaper for the monitor
+    hyprctl hyprpaper wallpaper "$monitor,$fullpath"
+}
+
 
 
 
