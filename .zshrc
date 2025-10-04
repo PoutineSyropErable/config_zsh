@@ -779,6 +779,32 @@ unalias gcm 2>/dev/null
 
 alias find_git_submodules="find . -type d -name '.git'"
 
+
+# :proper way to dir to .config. 
+# :proper way to git submodule add 
+# :proper way to add git submodules 
+
+
+function git_submodule_add_test() {
+	mkdir -p ~/.config/test
+	cd ~/.config/test || return 1
+
+
+	git init
+	gh repo create config_test --public 
+	git remote add origin ..config_test
+
+	git add .
+	git commit -m "Initial commit"
+	git push origin master
+
+
+	cd .. || return 1
+	git submodule add https://github.com/PoutineSyropErable/config_test test
+	# this step should transform the .git into a file
+}
+
+
 # Commit with a message
 gc() {
     git commit -m "$1"
