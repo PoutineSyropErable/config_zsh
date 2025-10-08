@@ -1,52 +1,57 @@
-# one for virtualvenv, stuff like python and conda
+#!/usr/bin/env bash
 
+# Detect OS
 if [ -f /etc/os-release ]; then
-	# Detect Linux distribution
 	source /etc/os-release
 	if [[ "$ID" == "arch" || "$ID_LIKE" == "arch" ]]; then
 		echo "Detected: Arch Linux"
 		SYSTEM="arch"
+	elif [[ "$ID" == "fedora" || "$ID_LIKE" == "fedora" ]]; then
+		echo "Detected: Fedora Linux"
+		SYSTEM="fedora"
 	else
 		echo "Detected: Other Linux ($ID)"
 		SYSTEM="linux"
 	fi
-elif [ "$(uname)" == "Darwin" ]; then
+elif [[ "$(uname)" == "Darwin" ]]; then
 	echo "Detected: macOS"
 	SYSTEM="macOS"
 else
-	echo -n "\n\n-------------------WARNING: Unknown OS---------------------------------\n\n"
-	printf "Check package_install.sh, and manually download the packages "
+	echo -e "\n\n-------------------WARNING: Unknown OS---------------------------------\n\n"
+	printf "Check package_install.sh, and manually download the packages\n"
 	exit 2
 fi
 
-#On arch: (Use yay or paru if you want lf-sixel-git)
-if [ SYSTEM == "arch" ]; then
-	printf "\n\n--------Installing Arch Linux Packages -------------\n\n"
-	PKGS=(
-		zoxide
-		atuin
-		thefuck
-		fzf
-		bat
-		ripgrep
-		fd
-		tmux
-		lf
-		lsd
-		lazygit
-		neovim
-		eza
-		jq
-		tree
-		kitty
-		git
-		coreutils
-		curl
-		wget
-		xclip
-		wl-clipboard
-		neofetch
-	)
+# Packages list (common for all supported systems)
+PKGS=(
+	zoxide
+	atuin
+	thefuck
+	fzf
+	bat
+	ripgrep
+	fd
+	tmux
+	lf
+	lsd
+	lazygit
+	neovim
+	eza
+	jq
+	tree
+	kitty
+	git
+	coreutils
+	curl
+	wget
+	xclip
+	wl-clipboard
+	neofetch
+)
+
+# Install packages
+if [[ "$SYSTEM" == "arch" ]]; then
+	echo -e "\n\n--------Installing Arch Linux Packages -------------\n\n"
 	if command -v yay >/dev/null 2>&1; then
 		echo "Using yay to install packages..."
 		yay -S --needed --noconfirm "${PKGS[@]}"
@@ -58,37 +63,28 @@ if [ SYSTEM == "arch" ]; then
 		sudo pacman -S --needed "${PKGS[@]}"
 	fi
 
+elif [[ "$SYSTEM" == "fedora" ]]; then
+	echo -e "\n\n--------Installing Fedora Packages -------------\n\n"
+	# --skip-unavailable avoids failure if a package doesn't exist
+	sudo dnf install -y "${PKGS[@]}" --skip-unavailable
+
+elif [[ "$SYSTEM" == "macOS" ]]; then
+	echo -e "\n\n--------Installing macOS Packages -------------\n\n"
+	brew install "${PKGS[@]}"
+
+else
+	echo -e "\n\n--------Installing Other Linux Packages -------------\n\n"
+	# Try apt (Debian/Ubuntu), zypper (openSUSE), or pacman fallback
+	if command -v apt >/dev/null 2>&1; then
+		sudo apt update
+		sudo apt install -y "${PKGS[@]}"
+	elif command -v zypper >/dev/null 2>&1; then
+		sudo zypper install -y "${PKGS[@]}"
+	elif command -v pacman >/dev/null 2>&1; then
+		sudo pacman -S --needed "${PKGS[@]}"
+	else
+		echo "No known package manager found. Please install manually: ${PKGS[*]}"
+	fi
 fi
 
-# maybe brew will failed to install some of them, if it does, just remove it untill it can install as much as possible
-# I don't have mac, but for you guys it should be this (I hope)
-if [ SYSTEM == "macOS" ]; then
-	printf "\n\n--------Installing MacOs Packages -------------\n\n"
-	brew install \
-		zoxide \
-		atuin \
-		thefuck \
-		fzf \
-		bat \
-		ripgrep \
-		fd \
-		tmux \
-		lf \
-		lsd \
-		lazygit \
-		neovim \
-		eza \
-		jq \
-		tree \
-		kitty \
-		git \
-		coreutils \
-		curl \
-		wget \
-		neofetch \
-		xclip
-	# xclip probably useless cause no x11 lol
-fi
-
-# For my team member: pip doesn't work for you guys due to certificate auth
-# So, we are using conda. So these two dirs aren't important
+# Note: pip / conda setup handled separately as needed
