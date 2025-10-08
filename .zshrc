@@ -61,6 +61,7 @@ fi
 
 
 openrc() {
+	# Open a file, and cd to it inside neovim
     local file=$1
     if [[ "$EDITOR" == "nvim" ]]; then
         "$EDITOR" --cmd 'autocmd VimEnter * CdHere' "$file"
@@ -552,8 +553,8 @@ alias amod="$EDITOR $EDITOR_FLAG ~/.config/awesome/rc.lua"
 alias bmod="openrc ~/.bashrc"
 alias cmod="$EDITOR $EDITOR_FLAG ~/.config/conky/show_all/show_all_conf"
 alias fmod="$EDITOR $EDITOR_FLAG ~/.config/fish/config.fish"
-alias gmod="cd ~/.config/gdb && $EDITOR ~/.config/gdb/.gdbinit"
-alias gdbmod="cd ~/.config/gdb && $EDITOR ~/.config/gdb/.gdbinit"
+alias gmod="$EDITOR ~/.config/gdb/.gdbinit"
+alias gdbmod="$EDITOR ~/.config/gdb/.gdbinit"
 alias hmod="$EDITOR $EDITOR_FLAG ~/.config/hypr/hyprland.conf"
 alias imod="$EDITOR $EDITOR_FLAG $HOME/.config/i3/config"
 alias irmod="$EDITOR $EDITOR_FLAG ~/.config/ironbar/"
