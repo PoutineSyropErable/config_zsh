@@ -9,6 +9,7 @@ if [ -f /etc/os-release ]; then
 	elif [[ "$ID" == "fedora" || "$ID_LIKE" == "fedora" ]]; then
 		echo "Detected: Fedora Linux"
 		SYSTEM="fedora"
+		sudo dnf copr enable dejan/lazygit
 	else
 		echo "Detected: Other Linux ($ID)"
 		SYSTEM="linux"

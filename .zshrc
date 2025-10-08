@@ -162,19 +162,21 @@ fi
 # Clipboard Aliases (Wayland, X11, macOS)
 if [[ "$DISPLAY_SERVER" == "wayland" ]]; then
     alias c="wl-copy"
-    alias paste="wl-paste --type text/plain"
+    # alias paste="wl-paste --type text/plain"
     alias p="wl-paste --type text/plain"
 elif [[ "$DISPLAY_SERVER" == "x11" ]]; then
     alias c="xclip -selection clipboard"
-    alias paste="xclip -selection clipboard -o"
+    # alias paste="xclip -selection clipboard -o"
     alias p="xclip -selection clipboard -o"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     alias c="pbcopy"
-    alias paste="pbpaste"
+    # alias paste="pbpaste"
     alias p="pbpaste"
 else
     echo "Warning: Unknown display server or unsupported OS!"
 fi
+
+alias opaste="/usr/bin/paste"
 
 # Copy image to clipboard (Wayland/X11)
 img2clip() {
@@ -526,6 +528,8 @@ alias cvi="cd ~/.config/vim "
 alias cV="cd ~/.config/vim "
 alias cns="cd ~/.config/nvim/pyrightconfig.json"
 
+
+# :TERMINAL MUSIC , rmpc. rmpc = better ncmpcpp
 
 # next to the xmods (not implemented here. but it is implemented)
 # alias rvmod="rv $HOME/.config/nvim/scripts/pythonScripts/open_remote_nvim.py"
