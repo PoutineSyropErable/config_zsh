@@ -496,6 +496,43 @@ alias la='lsd -a'
 alias lsdir='lsd -d */'
 alias lsa="lsd -a"
 
+
+function ftypes_full() {
+	# The file types in the current dir
+	emulate -L zsh
+	setopt null_glob
+
+	typeset -A counts  # associative array
+	for f in *(.); do  # (.) = plain files only
+		ext=${f##*.}
+		[[ $f == *.* ]] || ext="(no ext)"
+		((counts[$ext]++))
+	done
+
+	print "📂 File types in $PWD"
+	print "-----------------------------"
+	for ext in ${(kOa)counts}; do
+		printf "%5d  %s\n" ${counts[$ext]} $ext
+	done
+}
+
+function ftypes() {
+	emulate -L zsh
+	setopt null_glob
+
+	typeset -A seen
+	for f in *(.); do
+		[[ $f == *.* ]] || continue
+		ext=".${f##*.}"
+		seen[$ext]=1
+	done
+
+	print "${(k)seen}"
+}
+
+
+
+
 alias ch='cd ~' # just doing "cd" will work by itself but idc
 alias cco="cd ~/.config"
 alias cala="cd ~/.config/alacritty/"
@@ -1571,6 +1608,58 @@ c_debug_stop() {
 }
 
 
+debug_forward() {
+    local exe_name="$1"
+    shift  # remove exe_name from arguments
+
+    if [[ -z "$exe_name" ]]; then
+        echo "Usage: debug_forward <exe_name> [args...]"
+        return 1
+    fi
+
+    if [[ $# -gt 0 ]]; then
+        rr record "$exe_name" -- "$@"
+    else
+        rr record "$exe_name"
+    fi
+}
+
+
+
+debug_backward() {
+    local exe_name="$1"
+    local rr_dir="$HOME/.local/share/rr"
+    local traces
+    local selected_trace
+
+    if [[ -z "$exe_name" ]]; then
+        echo "Usage: debug_backward <exe_name>"
+        return 1
+    fi
+
+    # List traces for this executable
+    traces=($(ls -1 "$rr_dir" | grep "^${exe_name}-"))
+    if [[ ${#traces[@]} -eq 0 ]]; then
+        echo "No traces found for $exe_name"
+        return 1
+    fi
+
+    # Pick a trace with fzf
+    selected_trace=$(printf "%s\n" "${traces[@]}" | fzf --prompt="Select rr trace: ")
+    if [[ -z "$selected_trace" ]]; then
+        echo "No trace selected"
+        return 1
+    fi
+
+    echo "[+] Replaying trace: $selected_trace"
+    rr replay "$rr_dir/$selected_trace"
+}
+
+alias dgf="debug_forward"
+alias dgb="debug_backward"
+
+
+
 real_mounts() {
   {
     echo -e "Filesystem Type Size Used Avail Use% Mounted_on"
@@ -1687,6 +1776,31 @@ function set_wallpaper() {
     # Set wallpaper for the monitor
     hyprctl hyprpaper wallpaper "$monitor,$fullpath"
 }
+
+function filepath_length() {
+	emulate -L zsh
+	setopt null_glob
+
+	if [[ -z $1 ]]; then
+		echo "Usage: filepath_length <relative-path>"
+		return 1
+	fi
+
+	# Resolve absolute path
+	local abs_path
+	abs_path=$(realpath -- "$1") || return 1
+
+	# Compute lengths
+	local total_len=${#abs_path}
+	local filename_len=${#${abs_path:t}}
+	local dir_len=${#${abs_path:h}}
+
+	# Print results
+	echo "Full path length: $total_len"
+	echo "Filename length: $filename_len"
+	echo "Directory length: $dir_len"
+}
+
 
 
 
@@ -1921,6 +2035,34 @@ alias c17="gcc -std=c17"
 alias c18="gcc -std=c18"
 alias c23="gcc -std=c23"
 
+
+# 16-bit cross-compiler
+alias gcc16="ia16-elf-gcc"
+alias gdb16="ia16-elf-gdb"
+alias g++16="ia16-elf-g++"
+alias as16="ia16-elf-as"
+alias ld16="ia16-elf-ld"
+
+# 32-bit cross-compiler
+alias gcc32="i686-elf-gcc"
+alias gdb32="i686-elf-gdb"
+alias g++32="i686-elf-g++"
+alias as32="i686-elf-as"
+alias ld32="i686-elf-ld"
+
+# 64-bit cross-compiler
+alias gcc64="x86_64-elf-gcc"
+alias gdb64="x86_64-elf-gdb"
+alias g++64="x86_64-elf-g++"
+alias as64="x86_64-elf-as"
+alias ld64="x86_64-elf-ld"
+
+
+function addsearch() {
+	address="$1" 
+	objdump -d build/myos.bin  | grep "$address" -C5
+}
+
 function partial_compile() {
 	input="$1"
 	output="$2"
@@ -2042,3 +2184,4 @@ typeset -g POWERLEVEL9K_HOST_FOREGROUND=red
 [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
 
 
+export PATH=$HOME/cross-tools/bin:$PATH
