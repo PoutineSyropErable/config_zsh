@@ -1997,6 +1997,12 @@ lcount() {
     -not -path '*/.*' \
     -not -name '*.pyc' \
     -not -name '*.png' \
+    -not -name '*.iso' \
+    -not -name '*.o' \
+    -not -name '*.bin' \
+    -not -name '*.log' \
+    -not -name 'compile_commands.json' \
+    -not -name '.idx' \
     -exec wc -l {} +
 }
 
