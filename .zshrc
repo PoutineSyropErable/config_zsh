@@ -540,6 +540,7 @@ alias ce="cd ~/.config/eww"
 alias cfi="cd ~/.config/fish"
 alias cg="cd ~/.config/gdb"
 alias cH="cd ~/.config/hypr"
+alias chy="cd ~/.config/hypr"
 alias ci3="cd ~/.config/i3"
 alias cir="cd ~/.config/ironbar"
 alias cka="cd ~/.config/kanata"
@@ -585,6 +586,8 @@ alias ct="cd ~/.local/share/Trash/files"
 alias cs9="cd ~ ; cd sem9"
 alias cs1="cd ~/Documents/University (Real)/Semester 10/"
 alias cs10="cs1"
+
+alias trash="trashy"
 
 # ─────────────────────────────────────────────────────
 #   5️⃣  Config  Files Modification
@@ -1496,6 +1499,23 @@ alias reverse="tac"
 alias sp="sudo pacman -S"
 alias yp="yay -S"
 
+# Find the git project root
+function find_git_root() {
+    local dir=${1:-$PWD}  # start from given dir or current directory
+    while [[ "$dir" != "/" ]]; do
+        if [[ -d "$dir/.git" ]]; then
+            echo "$dir"
+            return 0
+        fi
+        dir=$(dirname "$dir")
+    done
+    echo "No git repository found" >&2
+    return 1
+}
+
+
+alias fpr="find_git_root"
+
 
 # Safe file removal with confirmation
 # alias rm="rm -i"
@@ -1510,7 +1530,6 @@ alias disk="df -h"
 # See partition with names
 alias lsblk1="lsblk -o +PARTLABEL"
 
-alias fpr="/home/francois/.config/nvim/scripts/find_project_root"
 
 # List all open ports
 alias ports="ss -tuln"
@@ -1943,10 +1962,15 @@ alias rv1="rv --name=1"
 alias rv2="rv --name=2"
 alias rv3="rv --name=3"
 
+alias rve="rv --name=Editor"
+alias re="rv --name=Editor"
+
 # alias sv0="sv --name=0"
 alias sv1="sv --name=1"
 alias sv2="sv --name=2"
 alias sv3="sv --name=3"
+alias sve="sv --name=Editor"
+alias se="sv --name=Editor"
 
 
 
@@ -2000,9 +2024,11 @@ lcount() {
     -not -name '*.iso' \
     -not -name '*.o' \
     -not -name '*.bin' \
+    -not -name '*.dump' \
     -not -name '*.log' \
+    -not -name '*.elf' \
     -not -name 'compile_commands.json' \
-    -not -name '.idx' \
+    -not -name '*.idx' \
     -exec wc -l {} +
 }
 
@@ -2166,17 +2192,26 @@ function c2asm2() {
 # tmux sessionizer: 
 bindkey -s '^K' "tmux-sessionizer\n"
 bindkey -s '\eh' "tmux-sessionizer -s 0\n"
-bindkey -s '\et' "tmux-sessionizer -s 1\n"
-bindkey -s '\en' "tmux-sessionizer -s 2\n"
-bindkey -s '\es' "tmux-sessionizer -s 3\n"
+bindkey -s '\eb' "tmux-sessionizer -s 1\n"
+bindkey -s '\ec' "tmux-sessionizer -s 2\n"
+bindkey -s '\en' "tmux-sessionizer -t Runner 0\n"
+bindkey -s '\et' "tmux-sessionizer -t Runner 1\n"
 
 alias tms="tmux-sessionizer"
 alias tms0="tmux-sessionizer -s 0"
 alias tms1="tmux-sessionizer -s 1"
-alias tms2="tmux-sessionizer -s 2"
-alias tms3="tmux-sessionizer -s 3"
+alias tms1="tmux-sessionizer -s 1"
+alias tmr0="tmux-sessionizer -t Runner 0"
+alias tmr1="tmux-sessionizer -t Runner 1"
 # these are for session commands, so it's kinda useles for me right now
 # learn what it is used for
+
+
+function org() {
+	rg --color=always --line-number --no-heading --hidden \
+  "$1" $(rg --files-with-matches PATTERN | sort -V)
+
+}
 
 
 #---------------------------- ------------ END OF FILE ---------

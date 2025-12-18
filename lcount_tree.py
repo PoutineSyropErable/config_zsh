@@ -31,7 +31,7 @@ PROGRAMMING_EXT = {
 }
 
 # Always ignore these
-IGNORE_EXT = {".idx", ".iso", ".o", ".bin", ".log"}
+IGNORE_EXT = {".idx", ".iso", ".o", ".bin", ".log", ".dump", ".elf"}
 
 # Always ignore these *specific file names*
 IGNORE_FILES = {"compile_commands.json"}
@@ -41,7 +41,7 @@ IGNORE_FILES = {"compile_commands.json"}
 # -------------------------
 
 
-def is_binary(path):
+def is_binary(path: str):
     """Return True if file appears binary."""
     try:
         with open(path, "rb") as f:
@@ -53,9 +53,11 @@ def is_binary(path):
     return False
 
 
-def is_programming_file(path):
+def is_programming_file(path: str):
     """Decide if file should be counted."""
     _, ext = os.path.splitext(path)
+
+    print(f"ext = {ext}")
 
     # Hard exclusion
     if ext.lower() in IGNORE_EXT:
