@@ -1400,7 +1400,6 @@ export UNCRUSTIFY_CONFIG="$HOME/uncrustify_default.cfg"
 AutoMakeJava_Path="${HOME}/Documents/University (Real)/Semester 10/Comp 303/AutomakeJava"
 # Automake Java tool
 [[ -n "$AutoMakeJava_Path" && -d "$AutoMakeJava_Path/src" && ":$PATH:" != *":$AutoMakeJava_Path/src:"* ]] && PATH="$AutoMakeJava_Path/src:$PATH"
-# export PATH="$AutoMakeJava_Path/src:$PATH"
 export PATH
 
 # Path to Python executable inside the virtual environment
@@ -2027,8 +2026,10 @@ lcount() {
     -not -name '*.dump' \
     -not -name '*.log' \
     -not -name '*.elf' \
+    -not -name '*.pcm' \
     -not -name 'compile_commands.json' \
     -not -name '*.idx' \
+    -not -name '*.txt' \
     -exec wc -l {} +
 }
 
@@ -2225,4 +2226,10 @@ typeset -g POWERLEVEL9K_HOST_FOREGROUND=red
 [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
 
 
-export PATH=$HOME/cross-tools/bin:$PATH
+# not needed
+
+## [Completion]
+## Completion scripts setup. Remove the following line to uninstall
+[[ -f /home/francois/.config/.dart-cli-completion/zsh-config.zsh ]] && . /home/francois/.config/.dart-cli-completion/zsh-config.zsh || true
+## [/Completion]
+

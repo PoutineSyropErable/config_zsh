@@ -57,7 +57,7 @@ def is_programming_file(path: str):
     """Decide if file should be counted."""
     _, ext = os.path.splitext(path)
 
-    print(f"ext = {ext}")
+    # print(f"ext = {ext}")
 
     # Hard exclusion
     if ext.lower() in IGNORE_EXT:
