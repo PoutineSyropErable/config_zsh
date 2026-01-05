@@ -115,9 +115,9 @@ sudo() {
 # ─────────────────────────────────────────────────────
 
 # Initialize thefuck, when you make an error in terminal, type fuck and it will give you the correction
-if ! eval "$(thefuck --alias)"; then
-    echo "⚠️ Warning: Failed to initialize 'thefuck'"
-fi
+# if ! eval "$(thefuck --alias)"; then
+#     echo "⚠️ Warning: Failed to initialize 'thefuck'"
+# fi
 
 # Initialize zoxide. You don't need perfect path for cd. You can cd "bunch of keywords" and it will find the dir 
 if ! eval "$(zoxide init zsh)"; then
