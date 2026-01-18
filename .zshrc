@@ -725,6 +725,9 @@ fuzzy_find_content() {
 alias rgfzf="fuzzy_find_content"
 alias fzfrg="fuzzy_find_content"
 
+
+alias rgb="rg_better.py"
+
 # ─────────────────────────────────────────────────────
 # 📂 8️⃣ Advanced Directory Search
 # ─────────────────────────────────────────────────────
@@ -2105,6 +2108,12 @@ function partial_compile() {
     -fno-unwind-tables -fno-exceptions -fno-stack-protector \
     "$input" -o "$output"
 
+}
+
+function objd() {
+	local file="$1"
+    local base="${file%.*}"
+    objdump -D -h -M intel "$file" > "${base}.dump"
 }
 
 
